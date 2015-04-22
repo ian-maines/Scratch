@@ -1,0 +1,388 @@
+COS 161       Algorithms in Programming
+
+Prof. Briggs  Implementation Notes for TSP Problem
+
+This problem has several tricky aspects.  When I coded it myself,
+I made a number of mistakes that took quite a bit of time to locate.
+
+Drawing the Tour
+
+The first two input numbers of the test files are integer upper bounds
+for the x and the y values of the points in the file.  You should take 
+the maximum of those two and use that maximum value to set the scale 
+of the Turtle.  The scale is roughly the inverse of the pixel
+width, that is 1 pixel represents a distance of 1/scale.
+
+The Turtle methods go and fly can take double inputs in the range from
+0 to the maximum and will use the scale to calculate the correct pixel
+coordinates i and j to use for the double values.  The spot(double) 
+method can be used to draw a circle with a radius of the input value
+at the current pixel position of the Turtle.
+
+Representing the Tour
+
+You should have private data members for the list of points
+in the current tour, and a private double that holds the distance of the current
+tour.  It is much cheaper to update the distance as the list changes than
+it would be to iterate over it to produce the distance, especially if
+there are many points in the tour.  This introduces a class invariant
+relationship between the stored distance value and the list of points
+that all constructors and mutators should preserve.
+
+Note, the distance is 0 for the empty tour and for the tour with only
+one point, but when the second point is added, the tour distance is
+twice the distance between the two, once for going and once for
+returning.
+
+The tour is a cycle, but you should not have the first point of the list
+stored again as the last point of the list.  It is too cumbersome to
+accomplish node insertions and exchanges and subsequence reversals with
+such a scheme.  Instead, store each point once in the list, with the
+understanding that for tours with more than one point, there is
+conceptually an edge back from the last point to the first, an edge
+whose length contributes to the distance of the tour.  You should be
+sure to update the distance correctly when you modify the tour, in
+particular when you insert a point at the end of the list.
+
+Greedy Heuristics
+
+These two are very similar, with the smallest net increase a bit more
+complicated.  We discuss it first, since solving it leads immediately
+to a solution of the nearest neighbor.
+
+To determine the net increase we will need three points.
+
+1. the point P being inserted
+2. a point Ldr that is in the tour
+3. a point Trlr that is in the tour, in the node immediately to the left
+   of Ldr's node(that is, the tour visits Trlr and then visits Ldr
+   afterwards) assuming the list runs from left to right
+
+If d(p,q) is the distance function, then the net change of 
+inserting immediately after Trlr(and thus immediately before Ldr) is
+
+d(Trlr,P) + d(P,Ldr) - d(Trlr,Ldr)
+
+Now, we want to determine the index of the Trlr point in the list that
+minimizes that value, so we can insert P after the point at that index.
+
+There are several ways to do this, but in any of them we must iterate
+over the points of the tour so that each point in the tour assumes the 
+role of Trlr exactly once.  You should observe that as we slide both
+roles from left to right, Trlr assumes the previous value of Ldr,
+and so what was d(P,Ldr) will become d(Trlr,P), because d(p,q) = d(q,p).
+Careful programming will not recalculate these distances but will save
+the already calculated value in a variable ldrDistance, and copy it into
+another variable for trlrDistance.
+
+Of course, for a tour of current size < 2, there is no choice of where
+to insert P, so no need of a loop.  You should handle those situations as
+special cases, being careful to set the distance data member appropriately.
+It is very useful to draw a little picture to see what the correct
+expression to use is.
+
+For larger tours, how you initialize Ldr and Trlr will affect the termination
+condition of the loop, but the code must ensure that each point
+assumes the role of Trlr exactly once, and that when all have been
+considered, you know
+
+1. the minimum net change value
+2. the index of the Trlr point that achieved that minimum
+
+Because when Trlr assumes the value of the last point on the list Ldr
+will assume the value of the first point, that last case is best done
+below the loop.
+
+You should consult the Java api for a list's add method to see how to
+use it to insert the new point P AFTER the Trlr point that minimized
+the net change.
+
+Note that since you have already calculated net change, you will know exactly
+how the insertion will modify the distance of the tour, so you can update
+the distance data member to preserve the invariant with a simple 
+assignment.
+
+
+The nearest neighbor can use the same loop, but instead of minimizing
+the net change, you are minimizing d(Trlr,P), and looking for the index
+of the Trlr value that produces the minimum.  You can also calculate the
+net change at that Trlr value to facilitate updating the distance data
+member, but the position is determined by the minimum value of d(Trlr,P).
+
+
+To get some ideas about how to construct these loops, solve the following
+simpler problem first.  Suppose you have an array of double, A, of
+length n > 0.  Suppose further that you want to find the index i,
+0 <= i < n such that the value A[i] is the SMALLEST value in A
+(if there are two components with the smallest value, pick the index
+i of the FIRST one).
+
+If you can write a loop to do that, then the only differences is that
+for the loop here are that you are walking over a list rather than
+an array and instead of just looking up the value you are trying
+to minimize, you have to calculate it from the points in to tour.
+
+
+Local Search Heuristics
+
+At a high level the iteration of the local search heuristics is the
+following.
+
+boolean noChange;
+
+do{
+   noChange = true;
+   for each possible tweak twk of the current tour{
+      if (twk improves the current tour){
+         perform twk and update the distance;
+         noChange = false;
+      }
+   }
+}(while !noChange);
+
+The main issues are
+
+1. How do we iterate over all the possible tweaks?
+2. How do we tell if a tweak twk improves the tour?
+3. How do we perform the tweak and update the distance?
+
+POINT EXCHANGE
+
+The answer to the first depends on how we represent the tweaks.  If a tweak
+is a point exchange, then the indices of the points will do.  If we have N
+points, then the index values run from 0 to N-1, so we can consider all pairs
+of integers (i,j) such that
+
+0 <= i < j < N
+
+So we need to iterate over all such pairs.
+
+The best way to answer the second is to calculate the net change of performing
+the tweak.  If we have a pair (i,j), we should consider how the tour distance is
+changed if the two points are exchanged.  Note, if there are many points in the
+tour, most edges will be the same, and at most four will be changed.  It would be
+foolish to actually perform the tweak and iterate over the entire tour when only
+four edges are changed, and you will be penalized if that is your solution.
+Just identify the edges that would be deleted and the edges that would be added,
+and consider how that would affect the total distance.  If the net change reduces
+the distance, then it improves the tour.
+
+The subtlety is that the relevant edges for this calculation depend on whether
+(i,j) represent adjacent points or not.  You can draw a picture to see what
+expressions you should use.  You will need a test to determine when (i,j) indicates
+an adjacent pair and when it does not.  I had several bugs when I implemented
+the solution to this second question.  I recommend that you have several
+Point variables:  ptBeforeI, ptI, ptAfterI, ptBeforeJ, ptJ, and ptAfterJ.
+It's easy to use these to come up with the correct net change in distance
+for either adjacent points i and j or non-adjacent points i and j.  Note,
+when i is the first point and j is the last point, they are adjacent because
+of the wraparound edge, and that is a special case.  The only other adjacency
+situation is when j is i + 1.  You will need to distinguish the following
+three cases of the pairs (i,j) such that 0 <= i < j < N
+
+1. j == i + 1   Adjacent with j after i
+2. i == 0 and j == N-1  Adjacent with i after j
+3. all other cases
+
+For the last question, you will already have calculated the net change, so
+you will know how to change the distance.  You can use the remove and add methods
+to effect the swap, if the net change improves the distance.  Another way is
+to write a method in Point
+
+public void swap(Point other)
+
+that exchanges the coordinate values in this with other.  That would eliminate
+the need to take the items out of their current positions in the list.
+
+SUBSEQUENCE REVERSAL
+
+When the tweak is a subsequence reversal, you can again represent it as a pair
+of indices (i,j), but in this case, it refers to the sequence of points from i to
+j.  The constraint is that sequence size L satisfies   2 <= L <= N - 2.  This
+will require i != j.  You can devise the appropriate expressions for the requirement
+based on whether i < j, or j < i.  You can iterate over all (i,j) pairs such that
+0 <= i,j < N, with i != j, and use your expression to filter out sequences whose
+lengths are not within range.  Note, the length expression for (i,j) will be
+different when j < i, since it has to go to the end of the list and wrap 
+around.
+
+Again, most edges of the tour are not affected by the sequence reversal, and you
+should identify exactly which edges are changed, and determine an expression that
+computes the net change to the distance.  If the change is an improvement, then
+the sequence can be reversed.  The code should distinguish the cases when 
+i < j and j < i, and great care will need to be taken to correctly reverse the
+sequences.  Drawing a picture of how the list should be changed before attempting
+to code it is a good idea.  One way is to remove the points from the tour into
+another list, then insert them back in in reverse order.  An even simpler way
+is to do use the swap method described above.  This has the advantage that you
+do not actually have to change the list's structure, just what is stored in its
+members.
+
+In any event, the code must effect the conceptual change of reversing the
+sequence when doing so improves the distance.  Subsequence reversal, when correctly
+implemented, will eliminate any crossing edges from the tour, so that is one
+way to test correctness: if you still have crossing edges, it is not correct.
+
+Farthest Insertion Heuristic.
+
+Of the three advanced heuristics, this one may be the trickiest to code.  The
+observation that allows for an efficienct implementation is that as one point
+R is moved from the list of unplaced points to the tour, when we recalculate the
+maximum distances of all the points S that are left unplaced, we need only compare
+the previous maximum with the distance of the point S to R.
+
+We give a pseudo code characterization of the algorithm that uses two lists, a
+list of Points in the tour, and a list of Pair<Point,Double>.  The parameterized
+Pair class is included with the other files.
+
+You can use an array or linked list implementation, so the pseudo code just
+describes them as lists.  We use (P, x) to represent a pair instance that has
+Point P and Double value x.
+
+List<Pair<Point,Double>> notInTour;
+List<Point> tour = new List<Point>();
+
+load notInTour with (P,0.0) for all the points P in the input file.
+
+iterate over all points P,Q in notInTour and determine the values for
+P and Q that maximize d(P,Q); this will require a nested pair of loops,
+since you have to iterate P and iterate Q;
+
+Remove that P,Q pair from notInTour and place them in tour using smallest
+net increase insertion;
+
+iterate over notInTour, and for each point R in notInTour calculate
+the larger of d(R,P) and d(R,Q), and save it with R in the pair; that is,
+if max is the distance, save (R,max) in the list of pairs.  While doing
+this iteration, record the index of the R with the largest max value in
+largestIndex;
+
+Remove the pair (R,max) given by largestIndex from notInTour, and place it
+in tour using smallest net increase insertion.
+
+while (notInTour is not empty){
+   iterate over each (S,max) in notInTour and if d(S,R) > max, replace
+   (S,max) with (S,d(S,R)); while doing this, keep track in largestIndex of
+   the index of the (S,x) pair that has the largest x value;
+
+   remove the (S,x) pair at largestIndex and insert S in tour using
+   smallest net increase insertion;
+
+   R = that removed S value;
+}
+
+
+If you are not comfortable using the Pair class, you can add a field
+in Point to hold the maximum distance and modify the algorithm
+along these lines.  You need to store with each point that is not in the
+tour, the maximum of the distance from that point to the points that
+are in the tour, and update that stored value.
+
+You cannot code these operations if you do not have a good understanding
+of how they are supposed to work.  We encourage you to draw a visual
+representation of the tour list and how an operation should affect it.
+
+Important Notes on List Operations
+
+We have discussed the differences between array and linked implementations
+of lists, and you should be aware of the following facts that have serious
+impact on the efficiency of your solutions
+
+1. Using the get(int index) method with a LinkedList for accessing the
+interior is expensive, especially in a loop.  Use an iterator instead.
+Generally, the LinkedList methods get, add, remove, and set will take order
+n steps when applied to the interior of the list, since the links
+will need to be traversed.  In some cases the cost is unavoidable, but
+in a loop that is visiting all items, an iterator is much better than
+get.
+
+2. Using the indexOf(Object x) method to find the index of a given x
+is an expensive operation for either an array list or a linked list and
+should be avoided.  Instead, maintain the position of the objects you
+obtain in int variables.  Avoid using indexOf.
+
+3. Using the remove(int index) operation is expensive for an array list
+when removing from the interior.  In the farthest heuristic, you have to
+remove from the interior of the notInTour list, but instead of
+actually removing the node from the interior, you can instead use the
+set method to replace the item in the interior with the item from the
+end, and then remove the item from the end.  Removing from the end of
+an array list takes constant time, but removing from the interior is order
+n.
+
+4. In many cases the requirements of a problem's solution has some features
+that suggest using a linked list and some that suggest using an array list.
+In some cases, it may be a good idea to temporarily convert from one form
+to the other.  If there are n items, which can be obtained from the size()
+method, it is easy to construct an instance of the other form with the
+right capacity, and it will take  order n time to copy from one to the
+other, and order n to copy back again.  This would still be better than
+using a form that would change an order n operation to an order n squared
+operation.
+
+In my implementation of farthest insertion, I read the points into a list,
+but then converted it to an array for notInTour, and kept track of how many
+of array cells still contained points in an int variable.  This was 
+convenient and fast.
+
+Testing Your Code
+
+We cannot stress too much that if you implement an algorithm you need to test
+it with cases for which you know what the correct results should be.  The
+tsp4.txt file has four points that should give different results for the
+smallest net increase and the nearest neighbor.  
+
+tsp6.txt has input that should give the same results for the greedy 
+heuristics, but different results for the advanced heuristics.  In my 
+implementation, the greedy algoriths produce a tour of distance around
+3069, and the advanced produce a tour with a distance around 3026.
+
+Whatever algorithm you implement, contrive a few examples with very few points,
+maybe from four to six or so, for which you can anticipate how the algorithm
+should respond at each iteration.  During development, you can print out the
+current tour at each iteration to see that it did what it was supposed to.
+
+For the farthest insertion algorithm, here's a simple idea.  Put all the points
+on a straight line
+
+P0      P1     P2     P3       P4  P5
+
+Clearly, P0 and P5 are farthest apart and should be inserted first.  Now,
+if we have d(P0,P4) > d(P1,P5), then P4 should be inserted next.  Then
+if d(P1,P5) > d(P3,P0), P1 will be inserted next.  Then if d(P3,P0) > d(P2,P5),
+P3 will be inserted next, and finally, P2.  If smallest net increase is used,
+they should be inserted to end up just as they are above, P0, P1, ..., P5.
+
+That may not be the only test case you should use, but it is one that you can
+easily know what the algorithm should do.
+
+To test the local search heuristics, you should NOT, during development, 
+start with a tour created by using a greedy heuristic.  That would give you
+less control over the initial tour.  Instead, have a method that just adds
+the points in the order they occur in the input.  Then you can contrive
+examples using just a few points for which you know a swap or exchange should
+take place.  For example,  consider the points of a square
+
+(10,10), (110,10), (110,110), (10,110)
+
+If traversed in that order, the distance is 400.  If traversed in the order
+
+(10,10), (110,110), (10,110), (110,10)
+
+the distance is 200 * (1 + square root of 2), which is more, so the advanced
+heuristics should improve on that order. That order of points will also distinguish
+the nearest neighbor algorithm from the smallest net increase algorithm.  Those
+points are given in tsp4a.txt.
+
+I included the graphics my results for the bier127.txt file.  They are given
+on
+
+nearestBier.jpg      rounded distance is 6494
+smallestBier.jpg     rounded distance is 4537
+pointXChngBier.jpg   rounded distance is 4495
+seqReverseBier.jpg   rounded distance is 4457
+farthestBier.jpg     rounded distance is 4673
+
+All the graphics files show differences, though in some cases they are
+slight.  Yours should agree on the greedy heuristics but may be different on
+the others since I used some randomization.

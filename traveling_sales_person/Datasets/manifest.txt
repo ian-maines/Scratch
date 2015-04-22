@@ -1,0 +1,13 @@
+Input data files(9)
+
+bier127.txt
+tsp500.txt
+tsp4.txt (you should see a difference in the ways nearest
+          neighbor and smallest increase process this file)
+tsp4a.txt
+tsp6.txt
+tsp10.txt
+tsp100.txt
+tsp1000.txt
+usa13509.txt
+

@@ -26,3 +26,9 @@
 *.exe
 *.out
 *.app
+
+# VS2013 stuff
+*.opensdf
+*.sdf
+*.suo
+
