@@ -14,7 +14,28 @@
 #include <string>
 
 // Typedef for a point
-typedef std::pair<double, double> point_t;
+class point_t
+	{
+	public:
+		point_t (double x, double y)
+			: m_x (x)
+			, m_y (y)
+			{}
+
+		inline double x ()
+			{
+			return m_x;
+			}
+
+		inline double y ()
+			{
+			return m_y;
+			}
+
+	private:
+		double m_x;
+		double m_y;
+	};
 
 inline double square(double d)
 	{
@@ -25,13 +46,13 @@ inline double square(double d)
 std::string to_string(point_t p)
 	{
 	std::stringstream str;
-	str << "(" << std::to_string(p.first) << ", " << std::to_string(p.second) << ")";
+	str << "(" << (p.x ()) << ", " << (p.y ()) << ")";
 	return str.str();
 	}
 
 // absolute value of distance between points
 inline double distance (point_t a, point_t b)
 	{
-	return std::abs (square (a.first - b.first) + square (a.second - b.second));
+	return std::abs (square (a.x () - b.x ()) + square (a.y () - b.y ()));
 	}
 #endif // TSP_POINT_H

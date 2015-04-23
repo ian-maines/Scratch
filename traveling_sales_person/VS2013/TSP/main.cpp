@@ -42,12 +42,12 @@ void preamble ()
 point_t parse_line (const std::string& strLine)
 	{
 	cout << "parse_line ()" << endl;
-	std::string strTemp (strLine.begin (), strLine.begin () + strLine.find_first_of (" "));
+	const size_t nFirstSpace = strLine.find_first_of (" ");
+	std::string strTemp (strLine.begin (), strLine.begin () + nFirstSpace);
 	double x;
 	x = stod (strTemp);
-	strTemp = std::string (strLine.begin () + strLine.find_first_of (" "), strLine.end ());
+	strTemp = std::string (strLine.begin () + nFirstSpace, strLine.end ());
 	point_t point (x, stod(strTemp));
-	cout << "[parse_line () created: " << to_string (point) << endl;
 	return point;
 	}
 }

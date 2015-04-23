@@ -24,7 +24,7 @@ typedef std::list<point_t> tour_t;
 std::string to_string (tour_t tour)
 	{
 	std::string str;
-	std::for_each (tour.begin (), tour.end (), [&str](point_t p) { str += to_string (p) + "\n"; });
+	std::for_each (tour.begin (), tour.end (), [&str](const point_t& p) { str += to_string (p) + "\n"; });
 	return str;
 	}
 
