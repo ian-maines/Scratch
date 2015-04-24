@@ -39,15 +39,15 @@ void preamble ()
 
 // Takes a line as they appear in the data files (123.45 67.890) and parses
 // into two doubles
-point_t parse_line (const std::string& strLine)
+point_t parse_line (std::string strLine)
 	{
-	cout << "parse_line ()" << endl;
+	// Some of the data has a space at the beginning. (Nasty!)
+	if (&strLine.at (0) == " ")
+		{
+		strLine.erase (remove_if (strLine.begin (), strLine.end (), [](const char * c) {})
+		}
 	const size_t nFirstSpace = strLine.find_first_of (" ");
-	std::string strTemp (strLine.begin (), strLine.begin () + nFirstSpace);
-	double x;
-	x = stod (strTemp);
-	strTemp = std::string (strLine.begin () + nFirstSpace, strLine.end ());
-	point_t point (x, stod(strTemp));
+	point_t point (stod (std::string (strLine.begin (), strLine.begin () + nFirstSpace)), stod (std::string (strLine.begin () + nFirstSpace, strLine.end ())));
 	return point;
 	}
 }
@@ -57,10 +57,26 @@ int main(int argc, char* argv[])
     // Print out our preamble
     preamble ();
 
-	std::string strFilePath ("..\\..\\..\\Datasets\\tsp4.txt");
+	std::string strFilePath;
+
+	// Someone gave us a path to a file.
+	if (argc == 2)
+		{
+		strFilePath = argv[1];
+		}
+	else
+		{
+		strFilePath = ("..\\..\\..\\Datasets\\tsp100.txt");
+		}
+	
+	std::cout << "File to open: " << strFilePath << std::endl;
 
 	std::ifstream cDataFile;
 	cDataFile.open (strFilePath);
+	if (!cDataFile.is_open ())
+		{
+		cout << "Unable to open file" << endl;
+		}
 	
 	// First line has max x/y vals, currently don't care about that.
 	std::string strLine;
