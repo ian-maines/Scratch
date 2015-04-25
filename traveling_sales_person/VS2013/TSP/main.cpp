@@ -13,6 +13,7 @@
 
 #include <fstream>
 #include <string>
+#include <vector>
 #include <iterator>
 
 
@@ -37,15 +38,35 @@ void preamble ()
     return;
     }
 
+// Trim whitespace from both ends of the string
+void trim (std::string& str)
+	{
+	cout << "[trim ()] strating string:\t'" << str << "'" << endl;
+	vector<char> whitespace{ ' ', '\t', '\r', '\n' };
+	auto iswhitespace = [&whitespace](char ch) {return (std::find (whitespace.begin (), whitespace.end (), ch) != whitespace.end ()); };
+	string::iterator itr = str.begin ();
+	// From the beginning.
+	while (iswhitespace (*itr))
+		{
+		str.erase (itr);
+		++itr;
+		}
+	// from the end.
+	itr = str.end () - 1;
+	while (iswhitespace (*itr))
+		{
+		str.erase (itr);
+		--itr;
+		}
+	cout << "[trim ()] ending string:\t'" << str << "'" << endl;
+	}
+
 // Takes a line as they appear in the data files (123.45 67.890) and parses
 // into two doubles
 point_t parse_line (std::string strLine)
 	{
 	// Some of the data has a space at the beginning. (Nasty!)
-	if (&strLine.at (0) == " ")
-		{
-		strLine.erase (remove_if (strLine.begin (), strLine.end (), [](const char * c) {})
-		}
+	trim (strLine);
 	const size_t nFirstSpace = strLine.find_first_of (" ");
 	point_t point (stod (std::string (strLine.begin (), strLine.begin () + nFirstSpace)), stod (std::string (strLine.begin () + nFirstSpace, strLine.end ())));
 	return point;
