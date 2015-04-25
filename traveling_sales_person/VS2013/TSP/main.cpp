@@ -29,6 +29,14 @@ namespace
 {
 using namespace std;
 // Print out program-related data.
+
+// Debug directs messages to stdout when in debug mode.
+#ifdef NDEBUG
+ostream debug_out (cout);
+#else
+ofstream debug_out;
+#endif
+
 void preamble ()
     {
     cout << "***************************************" << endl
@@ -41,7 +49,7 @@ void preamble ()
 // Trim whitespace from both ends of the string
 void trim (std::string& str)
 	{
-	cout << "[trim ()] strating string:\t'" << str << "'" << endl;
+	debug_out << "[trim ()] strating string:\t'" << str << "'" << endl;
 	vector<char> whitespace{ ' ', '\t', '\r', '\n' };
 	auto iswhitespace = [&whitespace](char ch) {return (std::find (whitespace.begin (), whitespace.end (), ch) != whitespace.end ()); };
 	string::iterator itr = str.begin ();
@@ -58,7 +66,7 @@ void trim (std::string& str)
 		str.erase (itr);
 		--itr;
 		}
-	cout << "[trim ()] ending string:\t'" << str << "'" << endl;
+	debug_out << "[trim ()] ending string:\t'" << str << "'" << endl;
 	}
 
 // Takes a line as they appear in the data files (123.45 67.890) and parses
@@ -112,7 +120,7 @@ int main(int argc, char* argv[])
 		cStartData.push_front (parse_line (strLine));
 		}
 
-	cout << to_string (cStartData) << endl;
+	debug_out << to_string (cStartData) << endl;
 
 	// Exit message
 	cout << endl << "Press ENTER to exit...";

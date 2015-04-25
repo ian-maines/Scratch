@@ -38,11 +38,3 @@
 *.lastbuildstate
 *.tlog
 *.ilk
-
-
-
-*.ilk
-traveling_sales_person/VS2013/TSP/build/Debug/TSP.ilk
-traveling_sales_person/VS2013/TSP/build/Debug/TSP.pdb
-*.log
-traveling_sales_person/VS2013/TSP/TSP/Debug/TSP.tlog/link.read.1.tlog
