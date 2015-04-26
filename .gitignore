@@ -38,3 +38,5 @@
 *.lastbuildstate
 *.tlog
 *.ilk
+.filters
+.user
