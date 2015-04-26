@@ -29,5 +29,11 @@
     <ClInclude Include="..\tour.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\nearest_neighbor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\smallest_increase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -12,6 +12,7 @@
 #include <utility>
 #include <complex>
 #include <string>
+#include <math.h>
 
 // Typedef for a point
 class point_t
@@ -22,12 +23,17 @@ class point_t
 			, m_y (y)
 			{}
 
-		inline double x ()
+		point_t (const point_t& p)
+			: m_x (p.m_x)
+			, m_y (p.m_y)
+			{}
+
+		inline double x () const
 			{
 			return m_x;
 			}
 
-		inline double y ()
+		inline double y () const
 			{
 			return m_y;
 			}
@@ -51,8 +57,8 @@ std::string to_string(point_t p)
 	}
 
 // absolute value of distance between points
-inline double distance (point_t a, point_t b)
+inline double point_distance (const point_t& a, const point_t& b)
 	{
-	return std::abs (square (a.x () - b.x ()) + square (a.y () - b.y ()));
+	return std::sqrt (square (a.x () - b.x ()) + square (a.y () - b.y ()));
 	}
 #endif // TSP_POINT_H

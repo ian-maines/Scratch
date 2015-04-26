@@ -28,4 +28,18 @@ std::string to_string (tour_t tour)
 	return str;
 	}
 
+// Calculates the length of a tour.
+double tour_distance (const tour_t& tour)
+	{
+	double fDistance = 0;
+	point_t p (*tour.begin ());
+	auto dst = [&fDistance, &p](const point_t& p1) 
+		{
+		fDistance += point_distance (p, p1);
+		p = p1;
+		};
+	std::for_each (tour.begin (), tour.end (), dst);
+	return fDistance;
+	}
+
 #endif // TSP_TOUR_H
