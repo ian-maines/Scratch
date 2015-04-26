@@ -60,7 +60,6 @@ tour_t nearest_neighbor (const tour_t& rStart)
 	for (; source_itr != cEnd; ++source_itr)
 		{
 		//cout << "loop # " << loops++ << endl;
-		
 		cResult.insert (find_best (cResult, *source_itr), *source_itr);
 		}
 

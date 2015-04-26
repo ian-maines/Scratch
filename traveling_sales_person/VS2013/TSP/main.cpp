@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
 		}
 	else
 		{
-		strFilePath = ("..\\..\\..\\Datasets\\tsp100.txt");
+		strFilePath = ("..\\..\\..\\Datasets\\usa13509.txt");
 		}
 	
 	tour_t cStartData (LoadData (strFilePath));
