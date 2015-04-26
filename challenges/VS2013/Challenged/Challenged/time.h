@@ -11,9 +11,10 @@
 
 #include <cstdint>
 #include <chrono>
-#include <iostream>
 
 using namespace std;
+using namespace std::chrono;
+
 namespace
 {
 enum timeval_t
@@ -26,10 +27,10 @@ enum timeval_t
 }
 
 
-class tsp_time
+class time
 	{
 	public:
-		tsp_time ()
+		time ()
 			: m_ts (std::chrono::system_clock::now ().time_since_epoch ())
 			, m_nSysClkPrdNum (std::chrono::system_clock::period::num)
 			, m_nSysClkPrdDen (std::chrono::system_clock::period::den)

@@ -8,8 +8,6 @@
 
 // C++ headers
 #include <iostream>
-#include <chrono>
-#include <thread>
 
 #include <fstream>
 #include <string>
@@ -18,6 +16,7 @@
 
 
 // My headers.
+#include "time.h"
 #include "thread_base.h"
 #include "point.h"
 #include "tour.h"
@@ -133,9 +132,11 @@ int main(int argc, char* argv[])
 
 	cout << "Initial Distance:\t" << tour_distance (cStartData) << endl;
 
+	tsp_time cTime;
 	tour_t cEndData (nearest_neighbor (cStartData));
+	auto ms = cTime.elapsed_ms ();
 	double fEnd = tour_distance (cEndData);
-	cout << "Final Distance:\t\t" << fEnd << endl;
+	cout << "Time (ms): " << ms << " Final Distance:\t\t" << fEnd << endl;
 
 	//debug_out << to_string (cStartData) << endl;
 	//debug_out << to_string (cEndData) << endl;

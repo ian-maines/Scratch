@@ -31,9 +31,7 @@ tour_t::iterator find_best (tour_t& tour, point_t point)
 	for (tour_t::iterator itr = ++tour.begin (); itr != cEnd; ++itr)
 		{
 		// Special case where we can't go past the end...
-		tour_t::const_iterator next (itr);
-		++next;
-		double fDist = point_distance (point, (next == tour.end () ? *tour.begin () : *next));
+		double fDist = point_distance (point, (std::next (itr) == tour.end () ? *tour.begin () : *(std::next(itr))));
 		//cout << "Distance " << fDist << " Best Distance: " << fBestDst << endl;
 		if (fDist < fBestDst)
 			{

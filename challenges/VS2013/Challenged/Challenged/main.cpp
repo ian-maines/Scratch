@@ -8,6 +8,9 @@
 
 #include <iostream>
 #include <limits>
+
+#include "time.h"
+
 using namespace std;
 
 namespace
