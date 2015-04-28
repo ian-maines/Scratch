@@ -15,51 +15,26 @@ using namespace std;
 
 namespace
 {
-// Recursive.
-const unsigned int mask (0x01);
-bool power_of_2 (unsigned int x, unsigned int call_depth = 0)
+// This is order O(sizeof(t))
+bool power_of_2 (unsigned long long int x)
 	{
-	// 
 	int count = 0;
-	int localmask = 1;
-	while (localmask)
+	for (unsigned long long int localmask = 1; localmask; localmask = localmask << 1)
 		{
 		if (localmask & x)
 			{
 			count++;
 			}
-		localmask = localmask << 1;
 		}
 	return (count == 1);
-	// Method 2 below.
-	// trivial case.
-	if (x == 0)
-		{
-		return false;
-		}
-
-	if (x & mask)
-		{
-		if (!(x ^ mask))
-			{
-			return true;
-			}
-		else
-			{
-			return false;
-			}
-		}
-	else
-		{
-		return power_of_2 (x >> 1, call_depth + 1);
-		}
 	}
 
 }
 
 int main ()
 	{
-	for (unsigned int n = 0; n < std::numeric_limits<unsigned int>::max (); n++)
+	cout << "sizeof (unsigned long int): " << sizeof (unsigned long long int) << endl;
+	for (unsigned long long int n = 1; n; n = n << 1)
 		{
 		if (power_of_2 (n))
 			{
