@@ -40,3 +40,5 @@
 *.ilk
 *.filters
 *.user
+*.ipch
+WinsockLearning/Winsock.VC.opendb
