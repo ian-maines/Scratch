@@ -3,6 +3,17 @@
 
 namespace
 {
+// Allows two iterators in for loop
+struct duiter 
+	{ 
+	locations_t::iterator lociter;  
+	elements::iterator comboiter;  
+	duiter (locations_t::iterator li, elements::iterator ci)
+		: lociter (li)
+		, comboiter (ci)
+		{}
+	};
+
 class num_set
 	{
 	public:
@@ -121,9 +132,12 @@ bool math_group::local_validate ()
 		{
 		ASSERT (combo.size () == m_locations.size ());
 		// Make sure no column dupes
-		for (int i = 0; i < combo.size (); ++i)
+		for (duiter i (m_locations.begin (), combo.begin ());
+				i.lociter != m_locations.end () && i.comboiter != combo.end ();
+					++i.lociter, ++i.comboiter)
 			{
-
+			// Row dupes
+			std::find_if (combo.begin (), combo.end (), [&combo](auto val) {})
 			}
 		}
 	return false;	// TODO
