@@ -47,6 +47,7 @@ class combination
 		inline auto begin () const { return m_combination.cbegin (); }
 		inline auto end () { return m_combination.end (); }
 		inline auto end () const { return m_combination.cend (); }
+		inline auto size () const { return m_combination.size (); }
 
 		inline operator std::vector<element> () const { return m_combination; }
 

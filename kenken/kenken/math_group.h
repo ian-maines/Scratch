@@ -5,6 +5,8 @@
 #include <vector>
 #include <algorithm>
 
+#include "combination.h"
+
 enum class operation
 	{
 	none = 0,	// A single element of the grid pre-identified.
@@ -35,7 +37,7 @@ class math_expr
 class math_group
 	{
 	public:
-		math_group (math_expr expr, std::vector<point> locations)
+		math_group (math_expr expr, locations_t locations)
 			: m_expr (expr)
 			, m_locations (locations)
 			, m_num_locations (locations.size ())
@@ -43,18 +45,13 @@ class math_group
 			m_combinations = std::move (_build_combinations ());
 			}
 
+		// Determines if any of the combinations are invalid based on only the information within this math group.
+		// Sets the invalid state if so.
+		bool local_validate ();
 
 	private:
-		// Determines if any of the combinations are invalid based on only the information within this math group.
-		bool local_validate ()
-			{
-			for (auto& combo : m_combinations)
-				{
 
-				}
-			}
-
-		std::vector<combination> _build_combinations () const;
+		combinations_t _build_combinations () const;
 		// Expression for evaluating this math group.
 		math_expr m_expr;
 		// All locations in this math group.

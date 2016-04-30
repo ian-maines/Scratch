@@ -154,7 +154,9 @@
     <ClInclude Include="element.h" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="location.h" />
-    <ClInclude Include="math_group.cpp" />
+    <ClCompile Include="math_group.cpp">
+      <FileType>CppHeader</FileType>
+    </ClCompile>
     <ClInclude Include="debug.h" />
     <ClInclude Include="math_group.h" />
     <ClInclude Include="types.h" />
@@ -166,6 +168,9 @@
     <ClCompile Include="location.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="types.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

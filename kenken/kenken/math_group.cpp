@@ -67,7 +67,7 @@ class num_set
 	};
 }
 
-combinations_t math_group::build_combinations () const
+combinations_t math_group::_build_combinations () const
 	{
 	combinations_t combinations;
 	switch (m_expr.op ())
@@ -113,4 +113,18 @@ combinations_t math_group::build_combinations () const
 			}
 		}
 	return combinations;
+	}
+
+bool math_group::local_validate ()
+	{
+	for (auto& combo : m_combinations)
+		{
+		ASSERT (combo.size () == m_locations.size ());
+		// Make sure no column dupes
+		for (int i = 0; i < combo.size (); ++i)
+			{
+
+			}
+		}
+	return false;	// TODO
 	}
