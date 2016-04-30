@@ -55,15 +55,48 @@ struct board_t
 
 
 // Vector of elements representing a complete set of one combination valid for a math group.
-struct combination
+class combination
 	{
-	combination (std::vector<element>&& combination)
-		: m_combination  (combination)
-		, m_valid (true)
-		{}
-	// vector of chars representing this combination.
-	std::vector<element> m_combination;
-	bool m_valid;	// Set to false if this combination becomes impossible in the parent math group.
+	public:
+		combination (size_t size)
+			: m_combination (size, 1)	// Init values to 1.
+			, m_valid (true)
+			{}
+
+		combination (const std::vector<element>& combination)
+			: m_combination  (combination)
+			, m_valid (true)
+			{}
+
+		combination (const std::vector<element>&& combination)
+			: m_combination (std::move(combination))
+			, m_valid (true)
+			{}
+
+		bool is_valid () { return m_valid; }
+		void invalidate () { m_valid = false; }
+
+		inline bool operator== (const combination& rhs) const
+			{
+			return (m_combination == rhs.m_combination);
+			}
+
+		inline bool operator!= (const combination& rhs) const
+			{
+			return !(*this == rhs);
+			}
+
+		inline auto begin () { return m_combination.begin (); }
+		inline auto begin () const { return m_combination.cbegin (); }
+		inline auto end () { return m_combination.end (); }
+		inline auto end () const { return m_combination.cend (); }
+
+		inline operator std::vector<element> () const { return m_combination; }
+
+	private:
+		// vector of chars representing this combination.
+		std::vector<element> m_combination;
+		bool m_valid;	// Set to false if this combination becomes impossible in the parent math group.
 	};
 
 enum class operation
@@ -104,7 +137,14 @@ class math_group
 			m_combinations = std::move(_build_combinations ());
 			}
 
+
 	private:
+		// Determines if any of the combinations are invalid based on only the information within this math group.
+		bool local_validate ()
+			{
+
+			}
+
 		std::vector<combination> _build_combinations () const;
 		// Expression for evaluating this math group.
 		math_expr m_expr;

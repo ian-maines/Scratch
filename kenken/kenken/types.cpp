@@ -6,25 +6,25 @@
 
 namespace
 {
-class sum_set
+class num_set
 	{
 	public:
-		sum_set (size_t size)
-			: m_v (size, 1)
+		num_set (size_t size)
+			: m_v (size)
 			{
 			}
 		// prefix (++thing)
-		sum_set& operator++ ()
+		num_set& operator++ ()
 			{
 			_inc ();
 			return *this;
 			}
 
 		// postfix (thing++)
-		sum_set operator++ (int)
+		num_set operator++ (int)
 			{
 			// Implemented in terms of prefix operator.
-			sum_set result (*this);
+			num_set result (*this);
 			++(*this);
 			return result;
 			}
@@ -51,12 +51,12 @@ class sum_set
 	private:
 		// Recursive. Returns true on overflow.
 		bool _inc () { ASSERT (!is_max (), "OVERFLOW");  return _inc (m_v.end () - 1); }
-
+		// 
 		bool _inc (std::vector<unsigned char>::iterator pos)
 			{
 			if (*pos == board_size)
 				{
-				if (pos == m_v.begin ()) // Special processing for the most significant digit.
+				if (pos == m_v.m_combination.begin ()) // Special processing for the most significant digit.
 					{
 					return false;
 					}
@@ -65,7 +65,6 @@ class sum_set
 					*pos = 1;
 					return _inc (pos - 1);
 					}
-
 				}
 			else
 				{
@@ -73,7 +72,7 @@ class sum_set
 				}
 			}
 
-		std::vector<unsigned char> m_v;
+		combination m_v;
 	};
 }
 
@@ -109,7 +108,7 @@ std::string board_t::to_string ()
 
 std::vector<combination> math_group::_build_combinations () const
 	{
-	std::vector<combination> vals;
+	std::vector<combination> combinations;
 	switch (m_expr.op ())
 		{
 		case operation::none:
@@ -117,21 +116,28 @@ std::vector<combination> math_group::_build_combinations () const
 			std::vector<element> elems;
 			elems.push_back (m_expr.val ());
 			combination c (std::move (elems));
-			vals.push_back (c);
+			combinations.push_back (c);
 			break;
 			}
 		case operation::plus:
 			{
-			sum_set set (m_locations.size ());
+			num_set set (m_locations.size ());
 			while (!set.is_max ())
 				{
 				if (set.sum () == m_expr.val ())
 					{
-					vals.push_back (set.get ());
+					// No dupes
+					auto combo (set.get ());
+					std::sort (combo.begin (), combo.end (), [](auto l, auto r) {return r < l; });
+					if (std::find (combinations.begin (), combinations.end (), combo) == combinations.end ())
+						{
+						// TODO: Set valid bit to false on any combinations that won't work.
+						combinations.push_back (combo);
+						}
 					}
 				++set;
 				}
-			return vals;
+			return combinations;
 			break;
 			}
 		case operation::minus:
@@ -150,5 +156,5 @@ std::vector<combination> math_group::_build_combinations () const
 			break;
 			}
 		}
-	return vals;
+	return combinations;
 	}
