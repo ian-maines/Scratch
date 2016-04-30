@@ -5,6 +5,9 @@
 #include <vector>
 #include <numeric>
 #include <string>
+#include <algorithm>
+
+#include "debug.h"
 
 using element = unsigned char;
 using pt = std::pair<unsigned char, unsigned char>;
@@ -24,13 +27,7 @@ enum class location : unsigned char
 	i0,	i1,	i2,	i3,	i4,	i5,	i6,	i7,	i8,
 	};
 
-
-pt l_to_pt (location l)
-	{
-	const auto val = static_cast<unsigned char>(l);
-	// l / 9 is the row, l % 9 is the column
-	return std::make_pair ((val / 9), (val % 9));
-	}
+pt l_to_pt (location l);
 
 struct point
 	{
@@ -47,34 +44,11 @@ struct point
 struct board_t
 	{
 	board_t ()
-		{
-		clear ();
-		}
+		{ clear ();	}
 
 	void clear () { memset (&m_board, 0, sizeof (m_board)); }
-
-	void set (point point, element val)
-		{
-		m_board[point.m_pt.first][point.m_pt.second] = val;
-		}
-
-	std::string to_string ()
-		{
-		static_assert (board_size < std::numeric_limits<unsigned char>::max (), "Board size should not exceed 9, 255 will break this function.");
-		std::string val;
-		for (unsigned char y = 0; y < board_size; ++y)
-			{
-			for (unsigned char x = 0; x < board_size; ++x)
-				{
-				val += "[" + std::to_string((m_board[x][y])) + "]";
-				if (board_size - 1 == x)
-					{
-					val += "\n";
-					}
-				}
-			}
-		return val;
-		}
+	void set (point point, element val);
+	std::string to_string ();
 
 	element m_board[board_size][board_size];
 	};
@@ -92,12 +66,54 @@ struct combination
 	bool m_valid;	// Set to false if this combination becomes impossible in the parent math group.
 	};
 
-class math_group
+enum class operation
 	{
+	none = 0,	// A single element of the grid pre-identified.
+	plus,
+	minus,
+	mult,
+	div
+	};
+
+class math_expr
+	{
+	public:
+		math_expr (unsigned int val, operation op)
+			: m_val (val)
+			, m_op (op)
+			{}
+
+		unsigned int val () const { return m_val; }
+		operation op () const { return m_op; }
 
 	private:
+		// What this expression evaluates to.
+		unsigned int m_val;
+		// Math operation used to obtain val.
+		operation m_op;
+	};
+
+class math_group
+	{
+	public:
+		math_group (math_expr expr, std::vector<point> locations)
+			: m_expr (expr)
+			, m_locations (locations)
+			, m_num_locations (locations.size ())
+			{
+			m_combinations = std::move(_build_combinations ());
+			}
+
+	private:
+		std::vector<combination> _build_combinations () const;
+		// Expression for evaluating this math group.
+		math_expr m_expr;
+		// All locations in this math group.
+		std::vector<point> m_locations;
 		// All possible combinations for this math group.
 		std::vector<combination> m_combinations;
+		// Number of elements for quick access.
+		const unsigned char m_num_locations;
 	};
 
 
