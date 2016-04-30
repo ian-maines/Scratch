@@ -149,14 +149,21 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="board.h" />
+    <ClInclude Include="combination.h" />
+    <ClInclude Include="element.h" />
+    <ClInclude Include="globals.h" />
+    <ClInclude Include="location.h" />
     <ClInclude Include="math_group.cpp" />
     <ClInclude Include="debug.h" />
+    <ClInclude Include="math_group.h" />
     <ClInclude Include="types.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="kenken.cpp" />
+    <ClCompile Include="location.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="types.cpp" />
   </ItemGroup>

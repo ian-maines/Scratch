@@ -7,7 +7,10 @@
 #include <chrono>
 
 #include "types.h"
+#include "location.h"
+#include "combination.h"
 #include "debug.h"
+#include "math_group.h"
 
 int main()
 	{
