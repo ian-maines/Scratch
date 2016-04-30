@@ -1,7 +1,5 @@
-#include "math_group.h"
-
 #include "globals.h"
-#include "combination.h"
+#include "math_group.h"
 
 namespace
 {
@@ -65,13 +63,13 @@ class num_set
 				}
 			}
 
-		combination m_v;
+		std::vector<unsigned char> m_v;
 	};
 }
 
-combinations_t math_group::_build_combinations () const
+combinations_t math_group::build_combinations () const
 	{
-	std::vector<combination> combinations;
+	combinations_t combinations;
 	switch (m_expr.op ())
 		{
 		case operation::none:
@@ -90,7 +88,8 @@ combinations_t math_group::_build_combinations () const
 				if (set.sum () == m_expr.val ())
 					{
 					// Allow duplicates
-					combinations.push_back (set.get ());
+					combination c (set.get (), m_locations);
+					combinations.push_back (c);
 					}
 				++set;
 				}
