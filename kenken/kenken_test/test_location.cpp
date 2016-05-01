@@ -3,16 +3,17 @@
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
+#include "location.h"
+
 namespace kenken_test
 {		
-	TEST_CLASS(UnitTest1)
+TEST_CLASS(point)
 	{
 	public:
-		
-		TEST_METHOD(TestMethod1)
-		{
-			// TODO: Your test code here
-		}
+		TEST_METHOD(pt_to_l)
+			{
+			
+			}
 
 	};
 }
