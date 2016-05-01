@@ -44,26 +44,58 @@ class num_set
 					int sum (0);
 					std::for_each (m_elems.begin (), m_elems.end (), [&sum](auto i) { sum += i; });
 					return sum;
+					break;
 					}
 				case operation::minus:
 					{
-					// TODO
+					ASSERT (2 == m_elems.size ());
+					return std::abs (m_elems[0] - m_elems[1]);
 					break;
 					}
 				case operation::mult:
 					{
-					// TODO
+					int prod (1);
+					std::for_each (m_elems.begin (), m_elems.end (), [&prod](auto i) { prod *= i; });
+					return prod;
 					break;
 					}
 				case operation::div:
 					{
-					// TODO
+					ASSERT (2 == m_elems.size ());
+					unsigned char e0 (m_elems[0]);
+					unsigned char e1 (m_elems[1]);
+
+					if (e0 > e1)
+						{
+						// If they're not evenly divisible, return 0.
+						if (e0 % e1)
+							{
+							return 0;
+							}
+						else
+							{
+							return (e0 / e1);
+							}
+						}
+					else
+						{
+						// If they're not evenly divisible, return 0.
+						if (e1 % e0)
+							{
+							return 0;
+							}
+						else
+							{
+							return (e1 /e0);
+							}
+						}
 					break;
 					}
 				case operation::none:
 				default:
 					{
 					ASSERT (!"Case shouldn't be handled here.");
+					return 0;
 					break;
 					}
 				}

@@ -6,43 +6,48 @@
 #include <numeric>
 #include <string>
 #include <algorithm>
+#include <memory>
 
 #include "globals.h"
 #include "element.h"
 #include "location.h"
+#include "math_group.h"
 
-struct board_t
+enum element_vals { undetermined = 0 };
+
+class board_element
 	{
-	board_t ()
-		{
-		clear ();
-		}
+	public:
+		board_element (math_group_ptr parent_math_group)
+			: m_value (undetermined)	//  Value of 0 means undetermined.
+			, m_math_group (parent_math_group)
+			{}
 
-	void clear () { memset (&m_board, 0, sizeof (m_board)); }
+		element GetValue () const { return m_value; }
+		void SetValue (element val) { m_value = val; }
 
+	private:
+		element m_value;
+		math_group_ptr m_math_group;
+		// TODO: Column and row occupancies.
+	};
 
-	void set (point point, element val)
-		{
-		m_board[point.m_pt.first][point.m_pt.second] = val;
-		}
+using board_element_ptr = std::unique_ptr<board_element>;
 
-	std::string to_string ()
-		{
-		static_assert (board_size < std::numeric_limits<unsigned char>::max (), "Board size should not exceed 9, 255 will break this function.");
-		std::string val;
-		for (unsigned char y = 0; y < board_size; ++y)
-			{
-			for (unsigned char x = 0; x < board_size; ++x)
-				{
-				val += "[" + std::to_string ((m_board[x][y])) + "]";
-				if (board_size - 1 == x)
-					{
-					val += "\n";
-					}
-				}
-			}
-		return val;
-		}
+class board
+	{
+	public:
+		board (const std::vector<math_group>& math_groups);
 
-	element m_board[board_size][board_size];
+		void set_value (point point, element val);
+		std::string to_string ();
+
+		board_element_ptr& get (point pt);
+		void set (point pt, board_element_ptr&& val);
+
+	private:
+		void _build (const std::vector<math_group>& mgs);
+		int _point_to_index (point pt) const;
+
+		std::vector<board_element_ptr> m_board;
 	};

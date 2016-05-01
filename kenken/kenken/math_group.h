@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <memory>
 
 #include "combination.h"
 
@@ -48,6 +49,8 @@ class math_group
 			m_combinations = std::move (_build_combinations ());
 			}
 
+		const locations_t& get_locations () const { return m_locations; }
+
 	private:
 
 		combinations_t _build_combinations () const;
@@ -63,17 +66,4 @@ class math_group
 		const unsigned char m_num_locations;
 	};
 
-
-class cell
-	{
-	public:
-		cell ()
-			{}
-
-	private:
-		// Vector of possible combinations (from math group)
-		std::vector<combination> m_combinations;
-		// Vector of numbers this cell may NOT be.
-		std::vector<element> m_not;
-	};
-
+using math_group_ptr = std::shared_ptr<math_group>;

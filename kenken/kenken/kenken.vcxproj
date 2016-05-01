@@ -149,6 +149,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="board.cpp" />
     <ClInclude Include="board.h" />
     <ClInclude Include="combination.h" />
     <ClInclude Include="element.h" />

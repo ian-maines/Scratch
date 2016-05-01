@@ -32,6 +32,9 @@ location pt_to_l (pt p);
 
 struct point
 	{
+	point (unsigned char row, unsigned char col)
+		: m_pt (std::make_pair (row, col))
+		{}
 	explicit point (location l)
 		: m_pt (l_to_pt (l))
 		{}
