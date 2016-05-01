@@ -5,7 +5,6 @@
 
 namespace
 {
-
 class num_set
 	{
 	public:
@@ -36,11 +35,38 @@ class num_set
 			return bMax;
 			}
 
-		unsigned int sum () const
+		unsigned int opval (const operation op) const
 			{
-			int sum (0);
-			std::for_each (m_elems.begin (), m_elems.end (), [&sum](auto i) { sum += i; });
-			return sum;
+			switch (op)
+				{
+				case operation::plus:
+					{
+					int sum (0);
+					std::for_each (m_elems.begin (), m_elems.end (), [&sum](auto i) { sum += i; });
+					return sum;
+					}
+				case operation::minus:
+					{
+					// TODO
+					break;
+					}
+				case operation::mult:
+					{
+					// TODO
+					break;
+					}
+				case operation::div:
+					{
+					// TODO
+					break;
+					}
+				case operation::none:
+				default:
+					{
+					ASSERT (!"Case shouldn't be handled here.");
+					break;
+					}
+				}
 			}
 
 		const elements& get () const
@@ -80,54 +106,34 @@ combinations_t math_group::_build_combinations () const
 		duiter_t (locations_t::const_iterator li, elements::const_iterator ci): lociter (li), comboiter (ci){}
 		};
 	combinations_t combinations;
-	switch (m_expr.op ())
+
+	if (m_expr.op () == operation::none)	// Special case
 		{
-		case operation::none:
+		ASSERT (m_locations.size () == 1);
+		combination_elements elems;	// Map of location-to-value
+		elems.insert (std::make_pair (m_locations[0], m_expr.val ()));
+		combinations.emplace_back (combination (elems));
+		}
+	else
+		{
+		num_set set (m_locations.size ());
+		while (!set.is_max ())
 			{
-			ASSERT (m_locations.size () == 1);
-			combination_elements elems;	// Map of location-to-value
-			elems.insert (std::make_pair (m_locations[0], m_expr.val ()));
-			combinations.emplace_back (combination (elems));
-			break;
-			}
-		case operation::plus:
-			{
-			num_set set (m_locations.size ());
-			while (!set.is_max ())
+			if (set.opval (m_expr.op ()) == m_expr.val ())
 				{
-				if (set.sum () == m_expr.val ())
+				// Allow duplicates
+				combination_elements elems;
+				for (duiter_t i (m_locations.cbegin (), set.get ().cbegin ()); i.lociter != m_locations.end (); ++i.lociter, ++i.comboiter)
 					{
-					// Allow duplicates
-					combination_elements elems;
-					for (duiter_t i (m_locations.cbegin (), set.get ().cbegin ()); i.lociter != m_locations.end (); ++i.lociter, ++i.comboiter)
-						{
-						elems.insert (std::make_pair(*i.lociter, *i.comboiter));
-						}
-					combination c (elems);
-					if (combination_locally_valid (c))
-						{
-						combinations.emplace_back (std::move(c));
-						}
+					elems.insert (std::make_pair (*i.lociter, *i.comboiter));
 					}
-				++set;
+				combination c (elems);
+				if (combination_locally_valid (c))
+					{
+					combinations.emplace_back (std::move (c));
+					}
 				}
-			return combinations;
-			break;
-			}
-		case operation::minus:
-			{
-
-			break;
-			}
-		case operation::mult:
-			{
-
-			break;
-			}
-		case operation::div:
-			{
-
-			break;
+			++set;
 			}
 		}
 	return combinations;
