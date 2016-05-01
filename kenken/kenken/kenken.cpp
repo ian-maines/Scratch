@@ -16,8 +16,8 @@ int main()
 	{
 	std::cout << "TEST\n";
 	
-	//std::vector<point> math_locations = {point (location::a0), point (location::a1), point (location::a2)};
-	//math_group mg (math_expr (6, operation::plus), math_locations);
+	std::vector<point> math_locations = {point (location::a0), point (location::a1), point (location::a2)};
+	math_group mg (math_expr (6, operation::plus), math_locations);
 
 	location l1 (p_to_l (point (location::a0)));
 	location l2 (p_to_l (point (location::b3)));

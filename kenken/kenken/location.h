@@ -28,6 +28,7 @@ enum class column : unsigned char
 	};
 
 pt l_to_pt (location l);
+location pt_to_l (pt p);
 
 struct point
 	{
@@ -40,12 +41,22 @@ struct point
 
 	bool operator< (const point& rhs) const
 		{
-		return true;	// TODO: FIXME
+		return pt_to_l (m_pt) < pt_to_l (rhs.m_pt);
+		}
+
+	bool operator> (const point& rhs) const
+		{
+		return rhs < *this;
 		}
 
 	bool operator== (const point& rhs) const
 		{
-		return true;	// TODO: FIXME
+		return pt_to_l (m_pt) == pt_to_l (rhs.m_pt);
+		}
+
+	bool operator!= (const point& rhs) const
+		{
+		return  !(*this == rhs);
 		}
 
 	pt m_pt;

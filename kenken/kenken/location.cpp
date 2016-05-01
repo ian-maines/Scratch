@@ -11,3 +11,8 @@ location p_to_l (point p)
 	{
 	return static_cast<location> ((p.row () * 9) + (p.col ()));
 	}
+
+location pt_to_l (pt p)
+	{
+	return static_cast<location> ((p.first * 9) + p.second);
+	}

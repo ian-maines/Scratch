@@ -7,6 +7,9 @@
 
 #include "combination.h"
 
+// Returns false if the given combination is not valid with respect to itself (i.e. overlapping values in a row/column)
+bool combination_locally_valid (const combination& combo);
+
 enum class operation
 	{
 	none = 0,	// A single element of the grid pre-identified.
@@ -44,10 +47,6 @@ class math_group
 			{
 			m_combinations = std::move (_build_combinations ());
 			}
-
-		// Determines if any of the combinations are invalid based on only the information within this math group.
-		// Sets the invalid state if so.
-		bool local_validate ();
 
 	private:
 

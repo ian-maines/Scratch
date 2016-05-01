@@ -10,7 +10,7 @@ class num_set
 	{
 	public:
 		num_set (size_t size)
-			: m_elems (size)
+			: m_elems (size, 1)
 			{
 			}
 		// prefix (++thing)
@@ -103,7 +103,11 @@ combinations_t math_group::_build_combinations () const
 						{
 						elems.insert (std::make_pair(*i.lociter, *i.comboiter));
 						}
-					combinations.push_back (elems);
+					combination c (elems);
+					if (combination_locally_valid (c))
+						{
+						combinations.emplace_back (std::move(c));
+						}
 					}
 				++set;
 				}
@@ -129,23 +133,20 @@ combinations_t math_group::_build_combinations () const
 	return combinations;
 	}
 
-bool math_group::local_validate ()
+bool combination_locally_valid (const combination& combo)
 	{
-	for (auto& combo : m_combinations)
+	for (auto& i = combo.begin (); i != combo.end (); ++i)
 		{
-		ASSERT (combo.size () == m_locations.size ());
-		for (auto& i = combo.begin (); i != combo.end (); ++i)
+		auto dupe = std::find_if (combo.begin (), combo.end (), [&i](auto elem) { return elem.second == i->second; });
+		// Ignore the current element
+		if (dupe != i)
 			{
-			auto dupe = std::find_if (combo.begin (), combo.end (), [&i](auto elem) { return elem.second == i->second; });
-			// Ignore the current element
-			if (dupe != i)
+			// Value is the same, invalidate if both row and column are not different.
+			if ((i->first.row () == dupe->first.row ()) || (i->first.col () == dupe->first.col ()))
 				{
-				// Value is the same, invalidate if both row and column are not different.
-				if ((i->first.row () == dupe->first.row ()) && (i->first.col () == dupe->first.col ()))
-					{
-					combo.invalidate ();
-					}
+				return false;
 				}
 			}
 		}
+	return true;
 	}
