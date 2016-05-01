@@ -3,31 +3,26 @@
 #pragma once
 
 #include <vector>
+#include <map>
 
 #include "types.h"
 #include "location.h"
 #include "element.h"
 
+using combination_elements = std::map<point, element>;
+
 // Vector of elements representing a complete set of one combination valid for a math group.
 class combination
 	{
 	public:
-		combination (size_t size, const locations_t& locations)
-			: m_combination (size, 1)	// Init values to 1.
-			, m_valid (true)
-			, m_locations (locations)
-			{}
-
-		combination (const elements& combination, const locations_t& locations)
+		combination (const combination_elements& combination)
 			: m_combination (combination)
 			, m_valid (true)
-			, m_locations (locations)
 			{}
 
-		combination (const elements&& combination, const locations_t& locations)
-			: m_combination (std::move (combination))
+		combination (const combination_elements&& combination)
+			: m_combination (combination)
 			, m_valid (true)
-			, m_locations (locations)
 			{}
 
 		bool is_valid () { return m_valid; }
@@ -49,15 +44,11 @@ class combination
 		inline auto end () const { return m_combination.cend (); }
 		inline auto size () const { return m_combination.size (); }
 
-		inline operator std::vector<element> () const { return m_combination; }
-
 	private:
 		// vector of chars representing this combination.
-		elements m_combination;
+		combination_elements m_combination;
 		// Set to false if this combination becomes impossible in the parent math group.
 		bool m_valid;
-		// Reference to the location set of the parent math group.
-		const locations_t& m_locations;
 	};
 
 using combinations_t = std::vector<combination>;

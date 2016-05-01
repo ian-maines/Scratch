@@ -35,10 +35,22 @@ struct point
 		: m_pt (l_to_pt (l))
 		{}
 
-	unsigned char row () { return m_pt.first; }
-	unsigned char col () { return m_pt.second; }
+	unsigned char row () const { return m_pt.first; }
+	unsigned char col () const { return m_pt.second; }
+
+	bool operator< (const point& rhs) const
+		{
+		return true;	// TODO: FIXME
+		}
+
+	bool operator== (const point& rhs) const
+		{
+		return true;	// TODO: FIXME
+		}
 
 	pt m_pt;
 	};
+
+location p_to_l (point p);
 
 using locations_t = std::vector<point>;

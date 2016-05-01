@@ -1,24 +1,16 @@
+#include <type_traits>
+
 #include "globals.h"
 #include "math_group.h"
 
 namespace
 {
-// Allows two iterators in for loop
-struct duiter 
-	{ 
-	locations_t::iterator lociter;  
-	elements::iterator comboiter;  
-	duiter (locations_t::iterator li, elements::iterator ci)
-		: lociter (li)
-		, comboiter (ci)
-		{}
-	};
 
 class num_set
 	{
 	public:
 		num_set (size_t size)
-			: m_v (size)
+			: m_elems (size)
 			{
 			}
 		// prefix (++thing)
@@ -40,25 +32,25 @@ class num_set
 		bool is_max () const
 			{
 			bool bMax (true);
-			std::for_each (m_v.begin (), m_v.end (), [&bMax](auto i) { bMax &= (i == board_size); });
+			std::for_each (m_elems.begin (), m_elems.end (), [&bMax](auto i) { bMax &= (i == board_size); });
 			return bMax;
 			}
 
 		unsigned int sum () const
 			{
 			int sum (0);
-			std::for_each (m_v.begin (), m_v.end (), [&sum](auto i) { sum += i; });
+			std::for_each (m_elems.begin (), m_elems.end (), [&sum](auto i) { sum += i; });
 			return sum;
 			}
 
-		auto get () const
+		const elements& get () const
 			{
-			return m_v;
+			return m_elems;
 			}
 
 	private:
 		// Recursive. Allows overflow.
-		bool _inc () { return _inc (m_v.end () - 1); }
+		bool _inc () { return _inc (m_elems.end () - 1); }
 		// 
 		bool _inc (std::vector<unsigned char>::iterator pos)
 			{
@@ -74,21 +66,28 @@ class num_set
 				}
 			}
 
-		std::vector<unsigned char> m_v;
+		elements m_elems;
 	};
 }
 
 combinations_t math_group::_build_combinations () const
 	{
+	// Allows two iterators in for loop
+	struct duiter_t
+		{
+		locations_t::const_iterator lociter;
+		elements::const_iterator comboiter;
+		duiter_t (locations_t::const_iterator li, elements::const_iterator ci): lociter (li), comboiter (ci){}
+		};
 	combinations_t combinations;
 	switch (m_expr.op ())
 		{
 		case operation::none:
 			{
-			elements elems;
-			elems.push_back (m_expr.val ());
-			combination c (std::move (elems), m_locations);
-			combinations.push_back (c);
+			ASSERT (m_locations.size () == 1);
+			combination_elements elems;	// Map of location-to-value
+			elems.insert (std::make_pair (m_locations[0], m_expr.val ()));
+			combinations.emplace_back (combination (elems));
 			break;
 			}
 		case operation::plus:
@@ -99,8 +98,12 @@ combinations_t math_group::_build_combinations () const
 				if (set.sum () == m_expr.val ())
 					{
 					// Allow duplicates
-					combination c (set.get (), m_locations);
-					combinations.push_back (c);
+					combination_elements elems;
+					for (duiter_t i (m_locations.cbegin (), set.get ().cbegin ()); i.lociter != m_locations.end (); ++i.lociter, ++i.comboiter)
+						{
+						elems.insert (std::make_pair(*i.lociter, *i.comboiter));
+						}
+					combinations.push_back (elems);
 					}
 				++set;
 				}
@@ -131,14 +134,18 @@ bool math_group::local_validate ()
 	for (auto& combo : m_combinations)
 		{
 		ASSERT (combo.size () == m_locations.size ());
-		// Make sure no column dupes
-		for (duiter i (m_locations.begin (), combo.begin ());
-				i.lociter != m_locations.end () && i.comboiter != combo.end ();
-					++i.lociter, ++i.comboiter)
+		for (auto& i = combo.begin (); i != combo.end (); ++i)
 			{
-			// Row dupes
-			std::find_if (combo.begin (), combo.end (), [&combo](auto val) {})
+			auto dupe = std::find_if (combo.begin (), combo.end (), [&i](auto elem) { return elem.second == i->second; });
+			// Ignore the current element
+			if (dupe != i)
+				{
+				// Value is the same, invalidate if both row and column are not different.
+				if ((i->first.row () == dupe->first.row ()) && (i->first.col () == dupe->first.col ()))
+					{
+					combo.invalidate ();
+					}
+				}
 			}
 		}
-	return false;	// TODO
 	}
