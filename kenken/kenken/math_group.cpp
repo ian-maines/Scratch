@@ -153,7 +153,7 @@ combinations_t math_group::_build_combinations () const
 			{
 			if (set.opval (m_expr.op ()) == m_expr.val ())
 				{
-				// Allow duplicates
+				// Allow duplicates (value sets, not positions).
 				combination_elements elems;
 				for (duiter_t i (m_locations.cbegin (), set.get ().cbegin ()); i.lociter != m_locations.end (); ++i.lociter, ++i.comboiter)
 					{
@@ -162,7 +162,12 @@ combinations_t math_group::_build_combinations () const
 				combination c (elems);
 				if (combination_locally_valid (c))
 					{
+					DEBUG ("Adding combination %s\n", c.to_string ().c_str ());
 					combinations.emplace_back (std::move (c));
+					}
+				else
+					{
+					DEBUG ("Rejecting combination %s due to local invalid state\n", c.to_string ().c_str ());
 					}
 				}
 			++set;

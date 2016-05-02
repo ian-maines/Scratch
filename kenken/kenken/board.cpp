@@ -3,7 +3,7 @@
 
 #include "board.h"
 
-board::board (const std::vector<math_group>& math_groups)
+board::board (const std::vector<math_group_ptr>& math_groups)
 	: m_board (board_size*board_size)
 	{
 	_build (math_groups);
@@ -47,14 +47,14 @@ int board::_point_to_index (point pt) const
 	return (pt.row () * 9 + pt.col ());
 	}
 
-void board::_build (const std::vector<math_group>& mgs)
+void board::_build (const std::vector<math_group_ptr>& mgs)
 	{
 	std::for_each (mgs.begin (), mgs.end (),
 				   [this](auto mg) {
-						std::for_each (mg.get_locations ().begin (), mg.get_locations ().end (),
+						std::for_each (mg->get_locations ().begin (), mg->get_locations ().end (),
 									   [this, &mg](auto pt) {
-							ASSERT (nullptr == m_board.at (_point_to_index (pt)));
-							m_board[_point_to_index (pt)] = std::make_unique<board_element> (mg);
-							});
-		});
+											ASSERT (!m_board.at(_point_to_index (pt)));
+											m_board[_point_to_index (pt)] = std::make_unique<board_element> (mg);
+										});
+				});
 	}

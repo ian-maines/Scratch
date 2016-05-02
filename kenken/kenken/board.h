@@ -23,6 +23,11 @@ class board_element
 			, m_math_group (parent_math_group)
 			{}
 
+		board_element (board_element&& rhs)
+			: m_value (rhs.m_value)
+			, m_math_group (rhs.m_math_group)
+			{}
+
 		element GetValue () const { return m_value; }
 		void SetValue (element val) { m_value = val; }
 
@@ -37,7 +42,7 @@ using board_element_ptr = std::unique_ptr<board_element>;
 class board
 	{
 	public:
-		board (const std::vector<math_group>& math_groups);
+		board (const std::vector<math_group_ptr>& math_groups);
 
 		void set_value (point point, element val);
 		std::string to_string ();
@@ -46,7 +51,7 @@ class board
 		void set (point pt, board_element_ptr&& val);
 
 	private:
-		void _build (const std::vector<math_group>& mgs);
+		void _build (const std::vector<math_group_ptr>& mgs);
 		int _point_to_index (point pt) const;
 
 		std::vector<board_element_ptr> m_board;
