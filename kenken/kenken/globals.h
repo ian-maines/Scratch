@@ -5,3 +5,8 @@
 #include "debug.h"
 
 constexpr unsigned int board_size = 9;
+
+#include <memory>
+#include <iostream>
+#include <string>
+#include <cstdio>

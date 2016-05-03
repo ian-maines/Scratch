@@ -5,6 +5,26 @@
 
 namespace
 {
+struct rep_builder
+	{
+	rep_builder ()
+		{
+		// iterate over all rows/columns
+		for (unsigned char i (0); i < board_size; ++i)
+			{
+			std::vector<std::pair<unsigned char, unsigned int>> vec;
+			// Iterate over all values.
+			for (unsigned char j (0); j < board_size; ++j)
+				{
+				vec.push_back (std::make_pair (j, 0));
+				}
+			rep.insert (std::make_pair (i, vec));
+			}
+		}
+	// <row/col, <value, appearance count>
+	std::map<unsigned char, std::vector<std::pair<unsigned char, unsigned int>>> rep;
+	};
+// Custom class basically to represent an int - customized incrementing and rollover.
 class num_set
 	{
 	public:
@@ -126,9 +146,35 @@ class num_set
 
 		elements m_elems;
 	};
-}
+}	// namespace {anonymous}
 
-combinations_t math_group::_build_combinations () const
+std::string math_group::to_string () const
+	{
+	return string_format ("%s (%u locations): %u combinations.", m_expr.to_string ().c_str (), m_locations.size (), m_combinations.size ());
+	}
+
+
+void math_group::refresh_rep ()
+	{
+	rep_builder rows, cols;
+	for (auto& combo : m_combinations)
+		{
+		std::for_each (combo.begin (), combo.end (), [&rows, &cols, this](auto combo_elem)
+			{
+			auto row = rows.rep[combo_elem.first.row ()];
+			unsigned char value = combo_elem.second;
+			std::for_each (row.begin (), row.end (), [&value](auto pairpt) 
+				{
+				if (pairpt.first == value)
+					{
+					++(pairpt.second);
+					}
+				});
+			});
+		}
+	}
+
+combinations_t math_group::_build_combinations ()
 	{
 	// Allows two iterators in for loop
 	struct duiter_t
@@ -138,6 +184,8 @@ combinations_t math_group::_build_combinations () const
 		duiter_t (locations_t::const_iterator li, elements::const_iterator ci): lociter (li), comboiter (ci){}
 		};
 	combinations_t combinations;
+
+	DEBUG ("Building combinations for %s (size: %d)\n", m_expr.to_string ().c_str (), m_locations.size ());
 
 	if (m_expr.op () == operation::none)	// Special case
 		{
@@ -173,6 +221,7 @@ combinations_t math_group::_build_combinations () const
 			++set;
 			}
 		}
+	refresh_rep ();
 	return combinations;
 	}
 

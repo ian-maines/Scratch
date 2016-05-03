@@ -153,6 +153,7 @@
     <ClInclude Include="board.h" />
     <ClInclude Include="combination.h" />
     <ClInclude Include="element.h" />
+    <ClInclude Include="format.h" />
     <ClInclude Include="globals.h" />
     <ClInclude Include="location.h" />
     <ClCompile Include="math_group.cpp">

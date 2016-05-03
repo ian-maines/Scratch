@@ -42,7 +42,7 @@ class combination
 		std::string to_string () const
 			{
 			std::string str ("[");
-			std::for_each (m_combination.begin (), m_combination.end (), [&str](auto combo) \
+			std::for_each (m_combination.begin (), m_combination.end (), [&str](auto combo)
 				{ str.push_back ('0' + (int)combo.second); });
 			str.push_back (']');
 			return str;

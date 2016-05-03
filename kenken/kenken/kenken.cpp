@@ -54,9 +54,7 @@ const std::vector<math_group_ptr> board_def =
 }
 
 int main()
-	{
-	std::cout << "TEST\n";
-	
+	{	
 	locations_t math_locations = {point (location::a0), point (location::a1), point (location::a2)};
 	math_group mg (math_expr (6, operation::plus), math_locations);
 

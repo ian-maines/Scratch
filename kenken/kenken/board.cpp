@@ -57,4 +57,11 @@ void board::_build (const std::vector<math_group_ptr>& mgs)
 											m_board[_point_to_index (pt)] = std::make_unique<board_element> (mg);
 										});
 				});
+	unsigned int i (0);
+	for (const auto& mg : mgs)
+		{
+		i += mg->get_combinations ().size ();
+		DEBUG ("Math group %s\n", mg->to_string ().c_str ());
+		}
+	DEBUG ("Board contains %u locally valid combinations.\n", i);
 	}

@@ -2,6 +2,8 @@
 // Debugging utilities.
 #pragma once
 
+#include "format.h"
+
 #define VERBOSE_DEBUGGING
 
 #ifdef _DEBUG
@@ -10,14 +12,10 @@
 	#ifdef VERBOSE_DEBUGGING
 		#include <stdarg.h>
 		#include <cstdio>
-		inline void DEBUG (const char* fmt, ...)
+		template <typename ... Args>
+		inline void DEBUG (const std::string& fmt, Args&& ... args)
 			{
-			char buffer[1000];
-			va_list argptr;
-			va_start (argptr, fmt);
-			vsprintf_s (buffer, 1000, fmt, argptr);
-			va_end (argptr);
-			std::cout << buffer;
+			std::cout << string_format (std::forward<const std::string> (fmt), std::forward<Args> (args)...);
 			return;
 			}
 	#else
