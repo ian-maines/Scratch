@@ -5,8 +5,10 @@
 
 namespace
 {
+// Helper to build row/column representation.
 struct rep_builder
 	{
+	// Builds the skeleton for a row or column's value appearance state.
 	rep_builder ()
 		{
 		// iterate over all rows/columns
@@ -24,6 +26,7 @@ struct rep_builder
 	// <row/col, <value, appearance count>
 	std::map<unsigned char, std::vector<std::pair<unsigned char, unsigned int>>> rep;
 	};
+
 // Custom class basically to represent an int - customized incrementing and rollover.
 class num_set
 	{
@@ -48,6 +51,8 @@ class num_set
 			return result;
 			}
 
+		// Returns true if this num_set represents the max value allowed for the size of the current math operation and board
+		// (i.e. '99' for a 1x2 slot on a 9x9 board, '66' for the same slot on a 6x6 board).
 		bool is_max () const
 			{
 			bool bMax (true);
@@ -55,6 +60,8 @@ class num_set
 			return bMax;
 			}
 
+		// Returns the value this num_set currently represents based on the opval i.e. 6 for a [2,3] mult, 7 for a [1,2,4] plus.
+		// Return value of zero for division operations where the numbers aren't divisible.
 		unsigned int opval (const operation op) const
 			{
 			switch (op)
@@ -153,7 +160,7 @@ std::string math_group::to_string () const
 	return string_format ("%s (%u locations): %u combinations.", m_expr.to_string ().c_str (), m_locations.size (), m_combinations.size ());
 	}
 
-
+// Refreshes the numbers represented in each row/column.
 void math_group::refresh_rep ()
 	{
 	rep_builder rows, cols;
@@ -199,16 +206,20 @@ combinations_t math_group::_build_combinations ()
 		num_set set (m_locations.size ());
 		while (!set.is_max ())
 			{
+			// If this combination satisfies the math expression
 			if (set.opval (m_expr.op ()) == m_expr.val ())
 				{
 				// Allow duplicates (value sets, not positions).
-				combination_elements elems;
+				combination_elements elems;	// Elements of the current combination
+				// Insert the location-value pair into the element.
 				for (duiter_t i (m_locations.cbegin (), set.get ().cbegin ()); i.lociter != m_locations.end (); ++i.lociter, ++i.comboiter)
 					{
 					elems.insert (std::make_pair (*i.lociter, *i.comboiter));
 					}
+				// Build the combination
 				combination c (elems);
-				if (combination_locally_valid (c))
+				if (combination_locally_valid (c))	// Don't add the combination if it's invalid (i.e. has two '1's in the same row.
+
 					{
 					DEBUG ("Adding combination %s\n", c.to_string ().c_str ());
 					combinations.emplace_back (std::move (c));
