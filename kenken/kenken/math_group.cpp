@@ -5,6 +5,17 @@
 
 namespace
 {
+struct val_count
+	{
+	val_count (unsigned char val, unsigned int ac)
+		: value (val)
+		, appearance_count (ac)
+		{}
+
+	unsigned char value;
+	unsigned int appearance_count;
+	};
+
 // Helper to build row/column representation.
 struct rep_builder
 	{
@@ -12,19 +23,19 @@ struct rep_builder
 	rep_builder ()
 		{
 		// iterate over all rows/columns
-		for (unsigned char i (0); i < board_size; ++i)
+		for (unsigned char i (1); i <= board_size; ++i)
 			{
-			std::vector<std::pair<unsigned char, unsigned int>> vec;
+			std::vector<val_count> vec;
 			// Iterate over all values.
-			for (unsigned char j (0); j < board_size; ++j)
+			for (unsigned char j (1); j <= board_size; ++j)
 				{
-				vec.push_back (std::make_pair (j, 0));
+				vec.push_back (val_count (j, 0));
 				}
 			rep.insert (std::make_pair (i, vec));
 			}
 		}
 	// <row/col, <value, appearance count>
-	std::map<unsigned char, std::vector<std::pair<unsigned char, unsigned int>>> rep;
+	std::map<unsigned char, std::vector<val_count>> rep;
 	};
 
 // Custom class basically to represent an int - customized incrementing and rollover.
@@ -163,25 +174,47 @@ std::string math_group::to_string () const
 // Refreshes the numbers represented in each row/column.
 void math_group::refresh_rep ()
 	{
+	// First discover a count for each of the value for all rows/columns represented by this math group.
+	// FIXME: m_combinations may contain combinations that have been invalidated. Check for that!!!
 	rep_builder rows, cols;
 	for (auto& combo : m_combinations)
 		{
 		std::for_each (combo.begin (), combo.end (), [&rows, &cols, this](auto combo_elem)
 			{
-			auto row = rows.rep[combo_elem.first.row ()];
+			// Grab the value for this combo element.
 			unsigned char value = combo_elem.second;
-			std::for_each (row.begin (), row.end (), [&value](auto pairpt) 
+
+			// Go over the rows first.
+			// Grab the row for this combo element.
+			auto& row = rows.rep[combo_elem.first.row ()];
+			// Find the appearance count for the value we've got
+			auto row_val_ac (std::find_if (row.begin (), row.end (), [&value](auto location) 
 				{
-				if (pairpt.first == value)
-					{
-					++(pairpt.second);
-					}
-				});
+				return location.value == value;
+				}));
+			// Bump the appearance count.
+			ASSERT (row_val_ac != row.end ());	// FIXME: Why is this ASSERT firing?
+			++(row_val_ac->appearance_count);
+
+			// Now columns
+			// Grab the column for this combo element.
+			auto& col = cols.rep[combo_elem.first.col ()];
+			// Find the appearance count for the value we've got
+			auto col_val_ac (std::find_if (col.begin (), col.end (), [&value](auto location)
+				{
+				return location.value == value;
+				}));
+			// Bump the appearance count.
+			ASSERT (col_val_ac != col.end ());	// FIXME: Why is this ASSERT firing?
+			++(col_val_ac->appearance_count);
 			});
 		}
+
+	// Now update member variable representation.
+
 	}
 
-combinations_t math_group::_build_combinations ()
+void math_group::_build_combinations ()
 	{
 	// Allows two iterators in for loop
 	struct duiter_t
@@ -190,7 +223,6 @@ combinations_t math_group::_build_combinations ()
 		elements::const_iterator comboiter;
 		duiter_t (locations_t::const_iterator li, elements::const_iterator ci): lociter (li), comboiter (ci){}
 		};
-	combinations_t combinations;
 
 	DEBUG ("Building combinations for %s (size: %d)\n", m_expr.to_string ().c_str (), m_locations.size ());
 
@@ -199,7 +231,7 @@ combinations_t math_group::_build_combinations ()
 		ASSERT (m_locations.size () == 1);
 		combination_elements elems;	// Map of location-to-value
 		elems.insert (std::make_pair (m_locations[0], m_expr.val ()));
-		combinations.emplace_back (combination (elems));
+		m_combinations.emplace_back (combination (elems));
 		}
 	else
 		{
@@ -222,7 +254,7 @@ combinations_t math_group::_build_combinations ()
 
 					{
 					DEBUG ("Adding combination %s\n", c.to_string ().c_str ());
-					combinations.emplace_back (std::move (c));
+					m_combinations.emplace_back (std::move (c));
 					}
 				else
 					{
@@ -233,7 +265,7 @@ combinations_t math_group::_build_combinations ()
 			}
 		}
 	refresh_rep ();
-	return combinations;
+	return;
 	}
 
 bool combination_locally_valid (const combination& combo)

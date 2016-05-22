@@ -8,7 +8,7 @@
 
 #ifdef _DEBUG
 	#include <iostream>
-	#define ASSERT(expr) if (!expr) { std::cout << "ASSERT '" << #expr << "' failed.\n"; throw (-1); }
+	#define ASSERT(expr) if (!(expr)) { std::cout << "ASSERT '" << #expr << "' failed.\n"; throw (-1); }
 	#ifdef VERBOSE_DEBUGGING
 		#include <stdarg.h>
 		#include <cstdio>

@@ -76,7 +76,7 @@ class math_group
 			, m_locations (locations)
 			, m_num_locations (locations.size ())
 			{
-			m_combinations = std::move (_build_combinations ());
+			_build_combinations ();
 			}
 
 		const locations_t& get_locations () const { return m_locations; }
@@ -92,8 +92,7 @@ class math_group
 		void refresh_rep ();
 
 	private:
-
-		combinations_t _build_combinations ();
+		void _build_combinations ();
 		// Expression for evaluating this math group.
 		math_expr m_expr;
 		// All locations in this math group.
