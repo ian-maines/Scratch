@@ -4,21 +4,18 @@
 
 #include <vector>
 
-// Stored as <row, column>
-using pt = std::pair<unsigned char, unsigned char>;
-
 // Defines location on the board. 9x9 is 0-8, a-i.
 enum class location : unsigned char
 	{
-	a0 = 0, a1, a2, a3, a4, a5, a6, a7, a8,
-	b0, b1, b2, b3, b4, b5, b6, b7, b8,
-	c0, c1, c2, c3, c4, c5, c6, c7, c8,
-	d0, d1, d2, d3, d4, d5, d6, d7, d8,
-	e0, e1, e2, e3, e4, e5, e6, e7, e8,
-	f0, f1, f2, f3, f4, f5, f6, f7, f8,
-	g0, g1, g2, g3, g4, g5, g6, g7, g8,
-	h0, h1, h2, h3, h4, h5, h6, h7, h8,
-	i0, i1, i2, i3, i4, i5, i6, i7, i8,
+	a0 = 0, b0, c0, d0, e0, f0, g0, h0, i0,
+	a1, b1, c1, d1, e1, f1, g1, h1, i1,
+	a2, b2, c2, d2, e2, f2, g2, h2, i2,
+	a3, b3, c3, d3, e3, f3, g3, h3, i3,
+	a4, b4, c4, d4, e4, f4, g4, h4, i4,
+	a5, b5, c5, d5, e5, f5, g5, h5, i5,
+	a6, b6, c6, d6, e6, f6, g6, h6, i6,
+	a7, b7, c7, d7, e7, f7, g7, h7, i7,
+	a8, b8, c8, d8, e8, f8, g8, h8, i8,
 	};
 
 // Way to reference columns
@@ -27,42 +24,51 @@ enum class column : unsigned char
 	a = 0, b, c, d, e, f, g, h, i
 	};
 
-pt l_to_pt (location l);
-location pt_to_l (pt p);
+class point;
+point l_to_pt (location l);
+location pt_to_l (point p);
 
-struct point
+class point
 	{
-	point (unsigned char row, unsigned char col)
-		: m_pt (std::make_pair (row, col))
-		{}
-	explicit point (location l)
-		: m_pt (l_to_pt (l))
-		{}
+	public:
+		point (unsigned char row, unsigned char col)
+			: m_row (row)
+			, m_col (col)
+			{}
 
-	unsigned char row () const { return m_pt.first; }
-	unsigned char col () const { return m_pt.second; }
+		explicit point (location l)
+			{
+			point p (l_to_pt (l));
+			m_row = p.m_row;
+			m_col = p.m_col;
+			}
 
-	bool operator< (const point& rhs) const
-		{
-		return pt_to_l (m_pt) < pt_to_l (rhs.m_pt);
-		}
+		unsigned char row () const { return m_row; }
+		unsigned char col () const { return m_col; }
 
-	bool operator> (const point& rhs) const
-		{
-		return rhs < *this;
-		}
+		bool operator< (const point& rhs) const
+			{
+			return pt_to_l (*this) < pt_to_l (rhs);
+			}
 
-	bool operator== (const point& rhs) const
-		{
-		return pt_to_l (m_pt) == pt_to_l (rhs.m_pt);
-		}
+		bool operator> (const point& rhs) const
+			{
+			return rhs < *this;
+			}
 
-	bool operator!= (const point& rhs) const
-		{
-		return  !(*this == rhs);
-		}
+		bool operator== (const point& rhs) const
+			{
+			return pt_to_l (*this) == pt_to_l (rhs);
+			}
 
-	pt m_pt;
+		bool operator!= (const point& rhs) const
+			{
+			return !(*this == rhs);
+			}
+
+	private:
+		unsigned char m_row;
+		unsigned char m_col;
 	};
 
 location p_to_l (point p);

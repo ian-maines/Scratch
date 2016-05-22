@@ -23,7 +23,7 @@ struct rep_builder
 	rep_builder ()
 		{
 		// iterate over all rows/columns
-		for (unsigned char i (1); i <= board_size; ++i)
+		for (unsigned char i (0); i < board_size; ++i)
 			{
 			std::vector<val_count> vec;
 			// Iterate over all values.
@@ -172,6 +172,7 @@ std::string math_group::to_string () const
 	}
 
 // Refreshes the numbers represented in each row/column.
+// FIXME: Rows and cols are swapped.
 void math_group::refresh_rep ()
 	{
 	// First discover a count for each of the value for all rows/columns represented by this math group.
@@ -193,7 +194,7 @@ void math_group::refresh_rep ()
 				return location.value == value;
 				}));
 			// Bump the appearance count.
-			ASSERT (row_val_ac != row.end ());	// FIXME: Why is this ASSERT firing?
+			ASSERT (row_val_ac != row.end ());
 			++(row_val_ac->appearance_count);
 
 			// Now columns
@@ -205,7 +206,7 @@ void math_group::refresh_rep ()
 				return location.value == value;
 				}));
 			// Bump the appearance count.
-			ASSERT (col_val_ac != col.end ());	// FIXME: Why is this ASSERT firing?
+			ASSERT (col_val_ac != col.end ());
 			++(col_val_ac->appearance_count);
 			});
 		}
@@ -243,7 +244,7 @@ void math_group::_build_combinations ()
 				{
 				// Allow duplicates (value sets, not positions).
 				combination_elements elems;	// Elements of the current combination
-				// Insert the location-value pair into the element.
+				// Insert the location-value pairs into the element.
 				for (duiter_t i (m_locations.cbegin (), set.get ().cbegin ()); i.lociter != m_locations.end (); ++i.lociter, ++i.comboiter)
 					{
 					elems.insert (std::make_pair (*i.lociter, *i.comboiter));
@@ -251,7 +252,6 @@ void math_group::_build_combinations ()
 				// Build the combination
 				combination c (elems);
 				if (combination_locally_valid (c))	// Don't add the combination if it's invalid (i.e. has two '1's in the same row.
-
 					{
 					DEBUG ("Adding combination %s\n", c.to_string ().c_str ());
 					m_combinations.emplace_back (std::move (c));
