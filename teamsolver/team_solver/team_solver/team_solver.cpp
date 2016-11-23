@@ -76,6 +76,12 @@ int main ()
 	for (const auto& line : dk_lines)
 		{
 		dk_player_data_t p (dk_csv_str_to_player_data (line));
+#ifdef _DEBUG
+		if (dk_player_map.find (p.name) != dk_player_map.end ())
+			{
+			std::cout << "Duplicate player found in RG list: " << p.name << "\n";
+			}
+#endif
 		dk_player_map.insert (std::make_pair (p.name, p));
 		}
 	}
@@ -99,6 +105,12 @@ int main ()
 	for (const auto& line : rg_lines)
 		{
 		rg_player_data_t p (rg_csv_str_to_player_data (line));
+#ifdef _DEBUG
+		if (rg_player_map.find (p.name) != rg_player_map.end ())
+			{
+			std::cout << "Duplicate player found in RG list: " << p.name << "\n";
+			}
+#endif
 		rg_player_map.insert (std::make_pair (p.name, p));
 		}
 	}
@@ -124,6 +136,10 @@ int main ()
 					all_players[player_position::flex].push_back (p);
 					}
 				}
+			}
+		else
+			{
+			std::cout << "DraftKings player not found in RG list: " << dk_p_data.second.name << "\n";
 			}
 		}
 

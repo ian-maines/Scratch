@@ -42,3 +42,7 @@
 *.user
 *.ipch
 *.opendb
+teamsolver/team_solver/x64/Release/team_solver.ipdb
+*.iobj
+teamsolver/team_solver/Release/team_solver.ipdb
+*.csv
