@@ -44,12 +44,14 @@ class player
 	{
 	public:
 		player (const dk_player_data_t& dk_data, const rg_player_data_t& rg_data);
-		
+
 		player_position GetPosition () const { return m_position; };
 		std::string GetName () const { return m_name; }
 		size_t GetSalary () const { return m_salary; }
 		double GetAPPG () const { return m_appg; }
 		size_t GetHash () const { return m_hash; }
+		double GetProjectedPoints () const { return m_projected_pts; }
+		double GetWeightedValue () const { return m_weighted_value; };
 
 	private:
 		player_position m_position;
@@ -60,5 +62,7 @@ class player
 		double m_pts_per_k;	// Points per $1000
 		// Hash makes comparing players easier quicker
 		size_t m_hash;
+
+		double m_weighted_value;
 	};
 

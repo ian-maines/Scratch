@@ -21,6 +21,20 @@ inline bool is_team_valid (player& qb, player& rb1, player& rb2, player& wr1, pl
 		throw std::exception ();
 		}
 #endif
+	// Max salary
+	if ((qb.GetSalary () +
+		rb1.GetSalary () +
+		rb2.GetSalary () +
+		wr1.GetSalary () +
+		wr2.GetSalary () +
+		wr3.GetSalary () +
+		te.GetSalary () +
+		flex.GetSalary () +
+		dst.GetSalary ())
+			 > salary_cap)
+		{
+		return false;
+		}
 
 	// No dupes
 	if (rb1.GetHash () == rb2.GetHash () ||
@@ -37,19 +51,22 @@ inline bool is_team_valid (player& qb, player& rb1, player& rb2, player& wr1, pl
 		return false;
 		}
 
-	if ((qb.GetSalary () +
-		rb1.GetSalary () +
-		rb2.GetSalary ()  +
-		wr1.GetSalary ()  +
-		wr2.GetSalary ()  +
-		wr3.GetSalary ()  +
-		te.GetSalary ()   +
-		flex.GetSalary ()  +
-		dst.GetSalary ())
-			 > salary_cap)
+#ifdef _DEBUG
+	// No dupes
+	if (rb1.GetName () == rb2.GetName () ||
+		wr1.GetName () == wr2.GetName () ||
+		wr1.GetName () == wr3.GetName () ||
+		wr2.GetName () == wr3.GetName () ||
+		flex.GetName () == rb1.GetName () ||
+		flex.GetName () == rb2.GetName () ||
+		flex.GetName () == wr1.GetName () ||
+		flex.GetName () == wr2.GetName () ||
+		flex.GetName () == wr3.GetName () ||
+		flex.GetName () == te.GetName ())
 		{
-		return false;
+		throw std::exception ();
 		}
+#endif
 	return true;
 	}
 
@@ -89,9 +106,19 @@ struct team
 			flex.GetSalary () +
 			dst.GetSalary ();
 
+		total_weighted_value = qb.GetWeightedValue () +
+			rb1.GetWeightedValue () +
+			rb2.GetWeightedValue () +
+			wr1.GetWeightedValue () +
+			wr2.GetWeightedValue () +
+			wr3.GetWeightedValue () +
+			te.GetWeightedValue () +
+			flex.GetWeightedValue () +
+			dst.GetWeightedValue ();
+
 		// Validate all inputs
 #ifdef _DEBUG
-		if (is_team_valid (qb, rb1, rb2, wr1, wr2, wr3, te, flex, dst))
+		if (!is_team_valid (qb, rb1, rb2, wr1, wr2, wr3, te, flex, dst))
 			{
 			throw std::exception ();
 			}
@@ -118,7 +145,7 @@ struct team
 	// This is intentionally backwards because priority_queue puts highest first.
 	friend bool operator< (const team& lhs, const team& rhs)
 		{
-		return lhs.total_appg > rhs.total_appg;
+		return lhs.total_weighted_value > rhs.total_weighted_value;
 		}
 
 	player& m_qb;
@@ -133,5 +160,6 @@ struct team
 
 	// For easy player iteration.
 	double total_appg;
+	double total_weighted_value;
 	size_t total_salary;
 	};

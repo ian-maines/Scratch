@@ -30,22 +30,28 @@ bool threshold (const player& p)
 	switch (p.GetPosition ())
 		{
 		case player_position::qb:
-			return p.GetAPPG () > 13;
+			return p.GetAPPG () > 15 ||
+				p.GetProjectedPoints () > 17;
+
 			break;
 
 		case player_position::rb:
-			return p.GetAPPG () > 12;
+			return p.GetAPPG () > 14 ||
+				p.GetProjectedPoints () > 16;
 			break;
 		case player_position::wr:
-			return p.GetAPPG () > 10;
+			return p.GetAPPG () > 12 ||
+				p.GetProjectedPoints () > 14;
 			break;
 
 		case player_position::te:
-			return p.GetAPPG () > 8;
+			return p.GetAPPG () > 10 ||
+				p.GetProjectedPoints () > 12;
 			break;
 
 		case player_position::dst:
-			return p.GetAPPG () > 6;
+			return p.GetAPPG () > 8 ||
+				p.GetProjectedPoints () > 10;
 			break;
 		default:
 			throw std::exception ();
@@ -145,7 +151,7 @@ int main ()
 
 	// Now the fun part... Start building teams.
 	std::priority_queue<team> top_teams;
-	double combos (28204140888000/*all_players[player_position::qb].size () *
+	double combos (707888160000/*all_players[player_position::qb].size () *
 				   all_players[player_position::rb].size () *
 				   all_players[player_position::rb].size () *
 				   all_players[player_position::wr].size () *
@@ -154,6 +160,8 @@ int main ()
 				   all_players[player_position::te].size () *
 				   all_players[player_position::flex].size () *
 				   all_players[player_position::dst].size ()*/);
+
+	size_t teams_found (0);
 
 	std::cout << "Combos: " << combos << "\n";
 	double iterations (0);
@@ -179,12 +187,13 @@ int main ()
 										iterations++;
 										if (static_cast<long long unsigned int>(iterations) % 10000000 == 0)
 											{
-											std::cout << "Iteration '" << iterations << "', Progress = '" << iterations / combos * 100 << "%' Top teams size: '" << top_teams.size () <<"'\n";
+											std::cout << "Iteration '" << iterations << "', Progress = '" << iterations / combos * 100 << "%' Top teams size: '" << top_teams.size () << "' Teams Found: '" << teams_found <<"'\n";
 											}
 										try
 											{
 											if (is_team_valid (qb, rb1, rb2, wr1, wr2, wr3, te, flex, dst))
 												{
+												teams_found++;
 												team t (qb, rb1, rb2, wr1, wr2, wr3, te, flex, dst);
 												if (top_teams.size () < 100)
 													{

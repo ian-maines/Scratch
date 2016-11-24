@@ -14,6 +14,7 @@ player::player (const dk_player_data_t& dk_data, const rg_player_data_t& rg_data
 	, m_projected_pts (rg_data.projected_pts)
 	, m_pts_per_k (rg_data.projected_pts/(static_cast<double>(dk_data.salary)/1000))
 	, m_hash (std::hash<std::string>{}(m_name))
+	, m_weighted_value (0)
 	{
 #ifdef _DEBUG
 	if (m_position == player_position::flex)
@@ -21,4 +22,6 @@ player::player (const dk_player_data_t& dk_data, const rg_player_data_t& rg_data
 		throw std::exception ();
 		}
 #endif
+
+	m_weighted_value = (m_appg + m_projected_pts) * abs(m_pts_per_k - 4);
 	}
