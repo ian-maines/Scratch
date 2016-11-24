@@ -82,30 +82,7 @@ struct team
 		, m_te (te)
 		, m_flex (flex)
 		, m_dst (dst)
-		, total_appg (0)
-		, total_salary (0)
 		{
-
-		total_appg = qb.GetAPPG () +
-			rb1.GetAPPG () +
-			rb2.GetAPPG () +
-			wr1.GetAPPG () +
-			wr2.GetAPPG () +
-			wr3.GetAPPG () +
-			te.GetAPPG () +
-			flex.GetAPPG () +
-			dst.GetAPPG ();
-
-		total_salary = qb.GetSalary () +
-			rb1.GetSalary () +
-			rb2.GetSalary () +
-			wr1.GetSalary () +
-			wr2.GetSalary () +
-			wr3.GetSalary () +
-			te.GetSalary () +
-			flex.GetSalary () +
-			dst.GetSalary ();
-
 		total_weighted_value = qb.GetWeightedValue () +
 			rb1.GetWeightedValue () +
 			rb2.GetWeightedValue () +
@@ -118,9 +95,9 @@ struct team
 
 		// Validate all inputs
 #ifdef _DEBUG
-		if (!is_team_valid (qb, rb1, rb2, wr1, wr2, wr3, te, flex, dst))
+//		if (!is_team_valid (qb, rb1, rb2, wr1, wr2, wr3, te, flex, dst))
 			{
-			throw std::exception ();
+//			throw std::exception ();
 			}
 #endif
 		}
@@ -136,10 +113,34 @@ struct team
 		m_te = rhs.m_te;
 		m_flex = rhs.m_flex;
 		m_dst = rhs.m_dst;
-		total_appg = rhs.total_appg;
-		total_salary = rhs.total_salary;
 
 		return *this;
+		}
+
+	double CalculateTotalAPPG () const
+		{
+		return m_qb.GetAPPG () +
+			m_rb1.GetAPPG () +
+			m_rb2.GetAPPG () +
+			m_wr1.GetAPPG () +
+			m_wr2.GetAPPG () +
+			m_wr3.GetAPPG () +
+			m_te.GetAPPG () +
+			m_flex.GetAPPG () +
+			m_dst.GetAPPG ();
+		}
+
+	size_t CalculateTotalSalary () const
+		{
+		return m_qb.GetSalary () +
+			m_rb1.GetSalary () +
+			m_rb2.GetSalary () +
+			m_wr1.GetSalary () +
+			m_wr2.GetSalary () +
+			m_wr3.GetSalary () +
+			m_te.GetSalary () +
+			m_flex.GetSalary () +
+			m_dst.GetSalary ();
 		}
 
 	// This is intentionally backwards because priority_queue puts highest first.
@@ -159,7 +160,5 @@ struct team
 	player& m_dst;
 
 	// For easy player iteration.
-	double total_appg;
 	double total_weighted_value;
-	size_t total_salary;
 	};

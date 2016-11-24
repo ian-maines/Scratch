@@ -6,6 +6,7 @@
 
 #include <map>
 #include <queue>
+#include <memory>
 #include <iostream>
 #include <algorithm>
 
@@ -150,66 +151,70 @@ int main ()
 		}
 
 	// Now the fun part... Start building teams.
-	std::priority_queue<team> top_teams;
-	double combos (707888160000/*all_players[player_position::qb].size () *
-				   all_players[player_position::rb].size () *
-				   all_players[player_position::rb].size () *
-				   all_players[player_position::wr].size () *
-				   all_players[player_position::wr].size () *
-				   all_players[player_position::wr].size () *
-				   all_players[player_position::te].size () *
-				   all_players[player_position::flex].size () *
-				   all_players[player_position::dst].size ()*/);
-
+	std::vector<team> top_teams;
+	std::unique_ptr<team> top_team (nullptr);
 	size_t teams_found (0);
 
-	std::cout << "Combos: " << combos << "\n";
-	double iterations (0);
-	bool bBreak (false);
+	size_t cqb (0);
+	size_t crb1 (0);
+	size_t crb2 (0);
 	for (auto& qb : all_players[player_position::qb])
 		{
+		crb1 = 0;
+		cqb++;
 		for (auto& rb1 : all_players[player_position::rb])
 			{
+			crb2 = 0;
+			crb1++;
 			for (auto& rb2 : all_players[player_position::rb])
 				{
+				crb2++;
+				std::cout << "RB2 updated. QB = " << cqb << ", RB1 = " << crb1 << ", RB2 = " << crb2 << "\n";
+				// Save ourselves some cycles.
+				if (rb2.GetHash () == rb1.GetHash ())
+					{
+					continue;
+					}
 				for (auto& wr1 : all_players[player_position::wr])
 					{
 					for (auto& wr2 : all_players[player_position::wr])
 						{
+						// save ourselves some cycles
+						if (wr2.GetHash () == wr1.GetHash ())
+							{
+							continue;
+							}
 						for (auto& wr3 : all_players[player_position::wr])
 							{
+							// save ourselves some cycles
+							if (wr3.GetHash () == wr2.GetHash () || wr3.GetHash () == wr1.GetHash ())
+								{
+								continue;
+								}
 							for (auto& te : all_players[player_position::te])
 								{
 								for (auto& flex : all_players[player_position::flex])
 									{
 									for (auto& dst : all_players[player_position::dst])
 										{
-										iterations++;
-										if (static_cast<long long unsigned int>(iterations) % 10000000 == 0)
+										if (is_team_valid (qb, rb1, rb2, wr1, wr2, wr3, te, flex, dst))
 											{
-											std::cout << "Iteration '" << iterations << "', Progress = '" << iterations / combos * 100 << "%' Top teams size: '" << top_teams.size () << "' Teams Found: '" << teams_found <<"'\n";
-											}
-										try
-											{
-											if (is_team_valid (qb, rb1, rb2, wr1, wr2, wr3, te, flex, dst))
+											teams_found++;
+											team t (qb, rb1, rb2, wr1, wr2, wr3, te, flex, dst);
+											if (!top_team)
 												{
-												teams_found++;
-												team t (qb, rb1, rb2, wr1, wr2, wr3, te, flex, dst);
-												if (top_teams.size () < 100)
-													{
-													top_teams.push (t);
-													//std::sort (top_teams.begin (), top_teams.end (), [](const team& t1, const team& t2) { return t1.GetTotalAPPG () < t2.GetTotalAPPG (); });
-													}
-												else if (t.total_appg > (top_teams.top ()).total_appg)
-													{
-													top_teams.pop ();
-													top_teams.push (t);
-													//std::sort (top_teams.begin (), top_teams.end (), [](const team& t1, const team& t2) { return t1.GetTotalAPPG () < t2.GetTotalAPPG (); });
-													}
+												top_team = std::make_unique<team> (t);
+												}
+											else if (t.total_weighted_value > top_team->total_weighted_value)
+												{
+												top_team = std::make_unique<team> (t);
+												}
+											//else if (t.total_weighted_value > (top_teams.top ()).total_weighted_value)
+												{
+												//top_teams.pop ();
+												//top_teams.push (t);
 												}
 											}
-										catch (...)
-											{ }
 										}
 									}
 								}
@@ -220,11 +225,11 @@ int main ()
 			}
 		}
 
-	while (top_teams.size ())
+	std::cout << "Found " << teams_found << " teams.\n";
+
+	for (const auto& t : top_teams)
 		{
-		team t = top_teams.top ();
-		top_teams.pop ();
-		std::cout << "\n\nTeam: \n" << t.total_appg << ", " << t.total_salary <<
+		std::cout << "\n\nTWV: '" << t.total_weighted_value << " TAPPG: '" << t.CalculateTotalAPPG () << "', Salary: '" << t.CalculateTotalSalary () << "'\n" <<
 			"QB  : " << t.m_qb.GetName () << ", " << t.m_qb.GetAPPG () << "\n" <<
 			"RB1 : " << t.m_rb1.GetName () << ", " << t.m_rb1.GetAPPG () << "\n" <<
 			"RB2 : " << t.m_rb2.GetName () << ", " << t.m_rb2.GetAPPG () << "\n" <<
