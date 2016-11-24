@@ -240,18 +240,19 @@ int main ()
 		}
 
 
-	for (auto& t : results)
+	for (auto& fut : results)
 		{
-		std::cout << "\n\nTWV: '" << t.get ()->total_weighted_value << " TAPPG: '" << t.get ()->CalculateTotalAPPG () << "', Salary: '" << t.get ()->CalculateTotalSalary () << "'\n" <<
-			"QB  : " << t.get ()->m_qb.GetName () << ", " << t.get ()->m_qb.GetAPPG () << "\n" <<
-			"RB1 : " << t.get ()->m_rb1.GetName () << ", " << t.get ()->m_rb1.GetAPPG () << "\n" <<
-			"RB2 : " << t.get ()->m_rb2.GetName () << ", " << t.get ()->m_rb2.GetAPPG () << "\n" <<
-			"WR1 : " << t.get ()->m_wr1.GetName () << ", " << t.get ()->m_wr1.GetAPPG () << "\n" <<
-			"WR2 : " << t.get ()->m_wr2.GetName () << ", " << t.get ()->m_wr2.GetAPPG () << "\n" <<
-			"WR3 : " << t.get ()->m_wr3.GetName () << ", " << t.get ()->m_wr3.GetAPPG () << "\n" <<
-			"TE  : " << t.get ()->m_te.GetName () << ", " << t.get ()->m_te.GetAPPG () << "\n" <<
-			"FLEX: " << t.get ()->m_flex.GetName () << ", " << t.get ()->m_flex.GetAPPG () << "\n" <<
-			"DST : " << t.get ()->m_dst.GetName () << ", " << t.get ()->m_dst.GetAPPG () << "\n";
+		auto t = fut.get ();
+		std::cout << "\n\nTWV: '" << t->total_weighted_value << " TAPPG: '" << t->CalculateTotalAPPG () << "', Salary: '" << t->CalculateTotalSalary () << "'\n" <<
+			"QB  : " << t->m_qb.GetName () << ", " << t->m_qb.GetAPPG () << "\n" <<
+			"RB1 : " << t->m_rb1.GetName () << ", " << t->m_rb1.GetAPPG () << "\n" <<
+			"RB2 : " << t->m_rb2.GetName () << ", " << t->m_rb2.GetAPPG () << "\n" <<
+			"WR1 : " << t->m_wr1.GetName () << ", " << t->m_wr1.GetAPPG () << "\n" <<
+			"WR2 : " << t->m_wr2.GetName () << ", " << t->m_wr2.GetAPPG () << "\n" <<
+			"WR3 : " << t->m_wr3.GetName () << ", " << t->m_wr3.GetAPPG () << "\n" <<
+			"TE  : " << t->m_te.GetName () << ", " << t->m_te.GetAPPG () << "\n" <<
+			"FLEX: " << t->m_flex.GetName () << ", " << t->m_flex.GetAPPG () << "\n" <<
+			"DST : " << t->m_dst.GetName () << ", " << t->m_dst.GetAPPG () << "\n";
 		}
 
     return 0;
