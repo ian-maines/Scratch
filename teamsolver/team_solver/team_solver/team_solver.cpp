@@ -9,10 +9,15 @@
 #include <memory>
 #include <iostream>
 #include <algorithm>
+#include <thread>
+#include <future>
+#include <chrono>
+
+using player_map_t = std::map<player_position, std::vector<player>>;
 
 namespace
 {
-void playermap_init (std::map<player_position, std::vector<player>>& map)
+void playermap_init (player_map_t& map)
 	{
 	if (map.size ())
 		{
@@ -59,6 +64,77 @@ bool threshold (const player& p)
 			break;
 		}
 	return false;
+	}
+
+std::unique_ptr<team> worker (player qb, player_map_t& all_players)
+	{
+	size_t crb1 (0);
+	size_t crb2 (0);
+	size_t teams_found (0);
+	std::unique_ptr<team> top_team (nullptr);
+	for (auto& rb1 : all_players[player_position::rb])
+		{
+		crb2 = 0;
+		crb1++;
+		for (auto& rb2 : all_players[player_position::rb])
+			{
+			crb2++;
+			std::cout << "RB2 updated. QB = " << qb.GetName () << ", RB1 = " << crb1 << ", RB2 = " << crb2 << "\n";
+			// Save ourselves some cycles.
+			if (rb2.GetHash () == rb1.GetHash ())
+				{
+				continue;
+				}
+			for (auto& wr1 : all_players[player_position::wr])
+				{
+				for (auto& wr2 : all_players[player_position::wr])
+					{
+					// save ourselves some cycles
+					if (wr2.GetHash () == wr1.GetHash ())
+						{
+						continue;
+						}
+					for (auto& wr3 : all_players[player_position::wr])
+						{
+						// save ourselves some cycles
+						if (wr3.GetHash () == wr2.GetHash () || wr3.GetHash () == wr1.GetHash ())
+							{
+							continue;
+							}
+						for (auto& te : all_players[player_position::te])
+							{
+							for (auto& flex : all_players[player_position::flex])
+								{
+								for (auto& dst : all_players[player_position::dst])
+									{
+									if (is_team_valid (qb, rb1, rb2, wr1, wr2, wr3, te, flex, dst))
+										{
+										teams_found++;
+										team t (qb, rb1, rb2, wr1, wr2, wr3, te, flex, dst);
+										if (!top_team)
+											{
+											top_team = std::make_unique<team> (t);
+											}
+										else if (t.total_weighted_value > top_team->total_weighted_value)
+											{
+											top_team = std::make_unique<team> (t);
+											}
+										//else if (t.total_weighted_value > (top_teams.top ()).total_weighted_value)
+											{
+											//top_teams.pop ();
+											//top_teams.push (t);
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	std::cout << "Found " << teams_found << " teams.\n";
+	return top_team;
 	}
 }
 
@@ -125,7 +201,7 @@ int main ()
 // *******************************************************************
 // Build up the player map.
 // *******************************************************************
-	std::map<player_position, std::vector<player>> all_players;
+	player_map_t all_players;
 	playermap_init (all_players);
 
 	// Iterate all of the dk players - rotogrinder includes players on bye
@@ -151,94 +227,31 @@ int main ()
 		}
 
 	// Now the fun part... Start building teams.
-	std::vector<team> top_teams;
-	std::unique_ptr<team> top_team (nullptr);
-	size_t teams_found (0);
-
-	size_t cqb (0);
-	size_t crb1 (0);
-	size_t crb2 (0);
+	std::vector<std::future<std::unique_ptr<team>>> results;
 	for (auto& qb : all_players[player_position::qb])
 		{
-		crb1 = 0;
-		cqb++;
-		for (auto& rb1 : all_players[player_position::rb])
-			{
-			crb2 = 0;
-			crb1++;
-			for (auto& rb2 : all_players[player_position::rb])
-				{
-				crb2++;
-				std::cout << "RB2 updated. QB = " << cqb << ", RB1 = " << crb1 << ", RB2 = " << crb2 << "\n";
-				// Save ourselves some cycles.
-				if (rb2.GetHash () == rb1.GetHash ())
-					{
-					continue;
-					}
-				for (auto& wr1 : all_players[player_position::wr])
-					{
-					for (auto& wr2 : all_players[player_position::wr])
-						{
-						// save ourselves some cycles
-						if (wr2.GetHash () == wr1.GetHash ())
-							{
-							continue;
-							}
-						for (auto& wr3 : all_players[player_position::wr])
-							{
-							// save ourselves some cycles
-							if (wr3.GetHash () == wr2.GetHash () || wr3.GetHash () == wr1.GetHash ())
-								{
-								continue;
-								}
-							for (auto& te : all_players[player_position::te])
-								{
-								for (auto& flex : all_players[player_position::flex])
-									{
-									for (auto& dst : all_players[player_position::dst])
-										{
-										if (is_team_valid (qb, rb1, rb2, wr1, wr2, wr3, te, flex, dst))
-											{
-											teams_found++;
-											team t (qb, rb1, rb2, wr1, wr2, wr3, te, flex, dst);
-											if (!top_team)
-												{
-												top_team = std::make_unique<team> (t);
-												}
-											else if (t.total_weighted_value > top_team->total_weighted_value)
-												{
-												top_team = std::make_unique<team> (t);
-												}
-											//else if (t.total_weighted_value > (top_teams.top ()).total_weighted_value)
-												{
-												//top_teams.pop ();
-												//top_teams.push (t);
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
+		results.push_back (std::async (std::launch::async, worker, qb, all_players));
+		}
+	
+	// Wait for the threads to join.
+	for (auto& future : results)
+		{
+		future.wait ();
 		}
 
-	std::cout << "Found " << teams_found << " teams.\n";
 
-	for (const auto& t : top_teams)
+	for (auto& t : results)
 		{
-		std::cout << "\n\nTWV: '" << t.total_weighted_value << " TAPPG: '" << t.CalculateTotalAPPG () << "', Salary: '" << t.CalculateTotalSalary () << "'\n" <<
-			"QB  : " << t.m_qb.GetName () << ", " << t.m_qb.GetAPPG () << "\n" <<
-			"RB1 : " << t.m_rb1.GetName () << ", " << t.m_rb1.GetAPPG () << "\n" <<
-			"RB2 : " << t.m_rb2.GetName () << ", " << t.m_rb2.GetAPPG () << "\n" <<
-			"WR1 : " << t.m_wr1.GetName () << ", " << t.m_wr1.GetAPPG () << "\n" <<
-			"WR2 : " << t.m_wr2.GetName () << ", " << t.m_wr2.GetAPPG () << "\n" <<
-			"WR3 : " << t.m_wr3.GetName () << ", " << t.m_wr3.GetAPPG () << "\n" <<
-			"TE  : " << t.m_te.GetName () << ", " << t.m_te.GetAPPG () << "\n" <<
-			"FLEX: " << t.m_flex.GetName () << ", " << t.m_flex.GetAPPG () << "\n" <<
-			"DST : " << t.m_dst.GetName () << ", " << t.m_dst.GetAPPG () << "\n";
+		std::cout << "\n\nTWV: '" << t.get ()->total_weighted_value << " TAPPG: '" << t.get ()->CalculateTotalAPPG () << "', Salary: '" << t.get ()->CalculateTotalSalary () << "'\n" <<
+			"QB  : " << t.get ()->m_qb.GetName () << ", " << t.get ()->m_qb.GetAPPG () << "\n" <<
+			"RB1 : " << t.get ()->m_rb1.GetName () << ", " << t.get ()->m_rb1.GetAPPG () << "\n" <<
+			"RB2 : " << t.get ()->m_rb2.GetName () << ", " << t.get ()->m_rb2.GetAPPG () << "\n" <<
+			"WR1 : " << t.get ()->m_wr1.GetName () << ", " << t.get ()->m_wr1.GetAPPG () << "\n" <<
+			"WR2 : " << t.get ()->m_wr2.GetName () << ", " << t.get ()->m_wr2.GetAPPG () << "\n" <<
+			"WR3 : " << t.get ()->m_wr3.GetName () << ", " << t.get ()->m_wr3.GetAPPG () << "\n" <<
+			"TE  : " << t.get ()->m_te.GetName () << ", " << t.get ()->m_te.GetAPPG () << "\n" <<
+			"FLEX: " << t.get ()->m_flex.GetName () << ", " << t.get ()->m_flex.GetAPPG () << "\n" <<
+			"DST : " << t.get ()->m_dst.GetName () << ", " << t.get ()->m_dst.GetAPPG () << "\n";
 		}
 
     return 0;
