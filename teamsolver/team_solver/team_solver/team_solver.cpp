@@ -12,6 +12,10 @@
 #include <thread>
 #include <future>
 #include <chrono>
+#include <sstream>
+#include <fstream>
+#include <ctime>
+
 
 using player_map_t = std::map<player_position, std::vector<player>>;
 
@@ -66,20 +70,20 @@ bool threshold (const player& p)
 	return false;
 	}
 
-std::unique_ptr<team> worker (player qb, player_map_t& all_players)
+
+
+
+std::unique_ptr<team> worker (player& qb, player_map_t& all_players)
 	{
 	size_t crb1 (0);
-	size_t crb2 (0);
 	size_t teams_found (0);
 	std::unique_ptr<team> top_team (nullptr);
 	for (auto& rb1 : all_players[player_position::rb])
 		{
-		crb2 = 0;
 		crb1++;
+		std::cout << "RB1 updated. QB = " << qb.GetName () << ", RB1 = " << crb1 << "\n";
 		for (auto& rb2 : all_players[player_position::rb])
 			{
-			crb2++;
-			std::cout << "RB2 updated. QB = " << qb.GetName () << ", RB1 = " << crb1 << ", RB2 = " << crb2 << "\n";
 			// Save ourselves some cycles.
 			if (rb2.GetHash () == rb1.GetHash ())
 				{
@@ -115,7 +119,7 @@ std::unique_ptr<team> worker (player qb, player_map_t& all_players)
 											{
 											top_team = std::make_unique<team> (t);
 											}
-										else if (t.total_weighted_value > top_team->total_weighted_value)
+										else if (t.total_projected_points > top_team->total_projected_points)
 											{
 											top_team = std::make_unique<team> (t);
 											}
@@ -140,6 +144,16 @@ std::unique_ptr<team> worker (player qb, player_map_t& all_players)
 
 int main ()
 	{
+			{
+			time_t t = time (0);   // get time now
+			struct tm now;
+			localtime_s (&now, &t);
+			std::cout << std::endl << (now.tm_hour) << ':'
+				<< (now.tm_min) << ':'
+				<< now.tm_sec
+				<< std::endl;
+			}
+
 // *******************************************************************
 // Grab draft kings data.
 // *******************************************************************
@@ -226,6 +240,9 @@ int main ()
 			}
 		}
 
+// ****************************************************************************************
+// Solution using std::async
+// ****************************************************************************************
 	// Now the fun part... Start building teams.
 	std::vector<std::future<std::unique_ptr<team>>> results;
 	for (auto& qb : all_players[player_position::qb])
@@ -240,19 +257,36 @@ int main ()
 		}
 
 
+	std::ofstream out_file;
+	out_file.open ("data_output.txt", std::ofstream::out | std::ofstream::app);
+
 	for (auto& fut : results)
 		{
 		auto t = fut.get ();
-		std::cout << "\n\nTWV: '" << t->total_weighted_value << " TAPPG: '" << t->CalculateTotalAPPG () << "', Salary: '" << t->CalculateTotalSalary () << "'\n" <<
-			"QB  : " << t->m_qb.GetName () << ", " << t->m_qb.GetAPPG () << "\n" <<
-			"RB1 : " << t->m_rb1.GetName () << ", " << t->m_rb1.GetAPPG () << "\n" <<
-			"RB2 : " << t->m_rb2.GetName () << ", " << t->m_rb2.GetAPPG () << "\n" <<
-			"WR1 : " << t->m_wr1.GetName () << ", " << t->m_wr1.GetAPPG () << "\n" <<
-			"WR2 : " << t->m_wr2.GetName () << ", " << t->m_wr2.GetAPPG () << "\n" <<
-			"WR3 : " << t->m_wr3.GetName () << ", " << t->m_wr3.GetAPPG () << "\n" <<
-			"TE  : " << t->m_te.GetName () << ", " << t->m_te.GetAPPG () << "\n" <<
-			"FLEX: " << t->m_flex.GetName () << ", " << t->m_flex.GetAPPG () << "\n" <<
-			"DST : " << t->m_dst.GetName () << ", " << t->m_dst.GetAPPG () << "\n";
+		std::stringstream str_stream;
+		str_stream << "\n\nTWV: '" << t->total_projected_points	<< " TAPPG: '" << t->CalculateTotalAPPG () << "', Salary: '" << t->CalculateTotalSalary () << "'\n" <<
+			"QB  : " << t->m_qb.GetName ()   << ", " << t->m_qb.GetProjectedPoints ()   << ", " << t->m_qb.GetAPPG ()   << t->m_qb.GetSalary () << "\n" <<
+			"RB1 : " << t->m_rb1.GetName () << ", " << t->m_rb1.GetProjectedPoints () << ", " << t->m_rb1.GetAPPG ()    << t->m_rb1.GetSalary () << "\n" <<
+			"RB2 : " << t->m_rb2.GetName () << ", " << t->m_rb2.GetProjectedPoints () << ", " << t->m_rb2.GetAPPG ()    << t->m_rb2.GetSalary () << "\n" <<
+			"WR1 : " << t->m_wr1.GetName () << ", " << t->m_wr1.GetProjectedPoints () << ", " << t->m_wr1.GetAPPG ()    << t->m_wr1.GetSalary () << "\n" <<
+			"WR2 : " << t->m_wr2.GetName () << ", " << t->m_wr2.GetProjectedPoints () << ", " << t->m_wr2.GetAPPG ()    << t->m_wr2.GetSalary () << "\n" <<
+			"WR3 : " << t->m_wr3.GetName () << ", " << t->m_wr3.GetProjectedPoints () << ", " << t->m_wr3.GetAPPG ()    << t->m_wr3.GetSalary () << "\n" <<
+			"TE  : " << t->m_te.GetName ()  << ", " << t->m_te.GetProjectedPoints () << ", "   << t->m_te.GetAPPG ()    << t->m_te.GetSalary () << "\n" <<
+			"FLEX: " << t->m_flex.GetName () << ", " << t->m_flex.GetProjectedPoints () << ", " << t->m_flex.GetAPPG () << t->m_flex.GetSalary () << "\n" <<
+			"DST : " << t->m_dst.GetName () << ", " << t->m_dst.GetProjectedPoints () << ", " << t->m_dst.GetAPPG () << t->m_dst.GetSalary () << "\n";
+
+		std::cout << str_stream.str ();
+		out_file << str_stream.str ();
+		} 
+	
+		{
+		time_t t = time (0);   // get time now
+		struct tm now;
+		localtime_s (&now, &t);
+		std::cout << std::endl << (now.tm_hour) << ':'
+			<< (now.tm_min) << ':'
+			<< now.tm_sec
+			<< std::endl;
 		}
 
     return 0;

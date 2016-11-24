@@ -83,15 +83,15 @@ struct team
 		, m_flex (flex)
 		, m_dst (dst)
 		{
-		total_weighted_value = qb.GetWeightedValue () +
-			rb1.GetWeightedValue () +
-			rb2.GetWeightedValue () +
-			wr1.GetWeightedValue () +
-			wr2.GetWeightedValue () +
-			wr3.GetWeightedValue () +
-			te.GetWeightedValue () +
-			flex.GetWeightedValue () +
-			dst.GetWeightedValue ();
+		total_projected_points = qb.GetProjectedPoints () +
+			rb1.GetProjectedPoints () +
+			rb2.GetProjectedPoints () +
+			wr1.GetProjectedPoints () +
+			wr2.GetProjectedPoints () +
+			wr3.GetProjectedPoints () +
+			te.GetProjectedPoints () +
+			flex.GetProjectedPoints () +
+			dst.GetProjectedPoints ();
 
 		// Validate all inputs
 #ifdef _DEBUG
@@ -143,10 +143,9 @@ struct team
 			m_dst.GetSalary ();
 		}
 
-	// This is intentionally backwards because priority_queue puts highest first.
 	friend bool operator< (const team& lhs, const team& rhs)
 		{
-		return lhs.total_weighted_value > rhs.total_weighted_value;
+		return lhs.total_projected_points < rhs.total_projected_points;
 		}
 
 	player& m_qb;
@@ -160,5 +159,5 @@ struct team
 	player& m_dst;
 
 	// For easy player iteration.
-	double total_weighted_value;
+	double total_projected_points;
 	};

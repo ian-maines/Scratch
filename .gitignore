@@ -50,3 +50,4 @@ teamsolver/team_solver/enc_temp_folder/ca16bb8a66f287c842d6bfad5641c/team.h
 *.enc
 teamsolver/team_solver/Release/team_solver.exe.lastcodeanalysissucceeded
 *.xml
+teamsolver/team_solver/data_output.txt
