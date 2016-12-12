@@ -17,6 +17,7 @@ struct dk_player_data_t
 	{
 	std::string name;
 	player_position position;
+	std::string str_position;
 	size_t salary;
 	double appg;
 	};
@@ -54,10 +55,11 @@ class player
 
 	private:
 		player_position m_position;
+		// Name accounts for the fact that there can be people with the same name playing different teams/positions.
 		std::string m_name;
 		size_t m_salary;
 		double m_appg;
-		double m_projected_pts;	// RotoGrinder projected points.
+		double m_projected_pts;	// avg of RotoGrinder projected points and FPPG from DraftKings.
 		double m_pts_per_k;	// Points per $1000
 		// Hash makes comparing players easier quicker
 		size_t m_hash;

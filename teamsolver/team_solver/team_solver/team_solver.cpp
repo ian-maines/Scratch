@@ -40,28 +40,23 @@ bool threshold (const player& p)
 	switch (p.GetPosition ())
 		{
 		case player_position::qb:
-			return p.GetAPPG () > 15 ||
-				p.GetProjectedPoints () > 17;
-
+				return p.GetProjectedPoints () > 15;
 			break;
 
 		case player_position::rb:
-			return p.GetAPPG () > 14 ||
-				p.GetProjectedPoints () > 16;
+				return p.GetProjectedPoints () > 12;
 			break;
+
 		case player_position::wr:
-			return p.GetAPPG () > 12 ||
-				p.GetProjectedPoints () > 14;
+				return p.GetProjectedPoints () > 11;
 			break;
 
 		case player_position::te:
-			return p.GetAPPG () > 10 ||
-				p.GetProjectedPoints () > 12;
+				return p.GetProjectedPoints () > 9;
 			break;
 
 		case player_position::dst:
-			return p.GetAPPG () > 8 ||
-				p.GetProjectedPoints () > 10;
+				return p.GetProjectedPoints () > 7;
 			break;
 		default:
 			throw std::exception ();
@@ -75,40 +70,55 @@ bool threshold (const player& p)
 
 std::unique_ptr<team> worker (player& qb, player_map_t& all_players)
 	{
-	size_t crb1 (0);
+	size_t cflex1 (0);
 	size_t teams_found (0);
 	std::unique_ptr<team> top_team (nullptr);
-	for (auto& rb1 : all_players[player_position::rb])
+	for (auto& flex : all_players[player_position::flex])
 		{
-		crb1++;
-		std::cout << "RB1 updated. QB = " << qb.GetName () << ", RB1 = " << crb1 << "\n";
-		for (auto& rb2 : all_players[player_position::rb])
+		cflex1++;
+		std::cout << "FLEX updated. QB = " << qb.GetName () << ", FLEX = " << cflex1 << "\n";
+		for (auto& rb1 : all_players[player_position::rb])
 			{
 			// Save ourselves some cycles.
-			if (rb2.GetHash () == rb1.GetHash ())
+			if (rb1.GetHash () == flex.GetHash ())
 				{
 				continue;
 				}
-			for (auto& wr1 : all_players[player_position::wr])
+			for (auto& rb2 : all_players[player_position::rb])
 				{
-				for (auto& wr2 : all_players[player_position::wr])
+				// Save ourselves some cycles.
+				if (rb2.GetHash () == rb1.GetHash () || rb2.GetHash () == flex.GetHash ())
+					{
+					continue;
+					}
+				for (auto& wr1 : all_players[player_position::wr])
 					{
 					// save ourselves some cycles
-					if (wr2.GetHash () == wr1.GetHash ())
+					if (wr1.GetHash () == flex.GetHash ())
 						{
 						continue;
 						}
-					for (auto& wr3 : all_players[player_position::wr])
+					for (auto& wr2 : all_players[player_position::wr])
 						{
 						// save ourselves some cycles
-						if (wr3.GetHash () == wr2.GetHash () || wr3.GetHash () == wr1.GetHash ())
+						if (wr2.GetHash () == wr1.GetHash () || wr2.GetHash () == flex.GetHash ())
 							{
 							continue;
 							}
-						for (auto& te : all_players[player_position::te])
+						for (auto& wr3 : all_players[player_position::wr])
 							{
-							for (auto& flex : all_players[player_position::flex])
+							// save ourselves some cycles
+							if (wr3.GetHash () == wr2.GetHash () || wr3.GetHash () == wr1.GetHash () || wr3.GetHash () == flex.GetHash ())
 								{
+								continue;
+								}
+							for (auto& te : all_players[player_position::te])
+								{
+								// save ourselves some cycles
+								if (te.GetHash () == flex.GetHash ())
+									{
+									continue;
+									}
 								for (auto& dst : all_players[player_position::dst])
 									{
 									if (is_team_valid (qb, rb1, rb2, wr1, wr2, wr3, te, flex, dst))
@@ -123,11 +133,6 @@ std::unique_ptr<team> worker (player& qb, player_map_t& all_players)
 											{
 											top_team = std::make_unique<team> (t);
 											}
-										//else if (t.total_weighted_value > (top_teams.top ()).total_weighted_value)
-											{
-											//top_teams.pop ();
-											//top_teams.push (t);
-											}
 										}
 									}
 								}
@@ -137,7 +142,7 @@ std::unique_ptr<team> worker (player& qb, player_map_t& all_players)
 				}
 			}
 		}
-	std::cout << "Found " << teams_found << " teams.\n";
+	std::cout << "Found " << teams_found << " teams." << "projected score: " << top_team->total_projected_points << "\n";
 	return top_team;
 	}
 }
@@ -176,7 +181,7 @@ int main ()
 #ifdef _DEBUG
 		if (dk_player_map.find (p.name) != dk_player_map.end ())
 			{
-			std::cout << "Duplicate player found in RG list: " << p.name << "\n";
+			std::cout << "Duplicate player found in DK list: " << p.name << "\n";
 			}
 #endif
 		dk_player_map.insert (std::make_pair (p.name, p));
@@ -202,12 +207,10 @@ int main ()
 	for (const auto& line : rg_lines)
 		{
 		rg_player_data_t p (rg_csv_str_to_player_data (line));
-#ifdef _DEBUG
 		if (rg_player_map.find (p.name) != rg_player_map.end ())
 			{
 			std::cout << "Duplicate player found in RG list: " << p.name << "\n";
 			}
-#endif
 		rg_player_map.insert (std::make_pair (p.name, p));
 		}
 	}
@@ -239,6 +242,13 @@ int main ()
 			std::cout << "DraftKings player not found in RG list: " << dk_p_data.second.name << "\n";
 			}
 		}
+
+	std::cout << "Player counts:\nQB: " << all_players[player_position::qb].size () << "\n"
+		<< "Player counts:\nRB  : " << all_players[player_position::rb].size () << "\n"
+		<< "Player counts:\nWR  : " << all_players[player_position::wr].size () << "\n"
+		<< "Player counts:\nTE  : " << all_players[player_position::te].size () << "\n"
+		<< "Player counts:\nFLEX: " << all_players[player_position::flex].size () << "\n"
+		<< "Player counts:\nDST : " << all_players[player_position::dst].size () << "\n\n";
 
 // ****************************************************************************************
 // Solution using std::async
@@ -289,6 +299,8 @@ int main ()
 			<< std::endl;
 		}
 
+	std::string in;
+	std::cin >> in;
     return 0;
 	}
 

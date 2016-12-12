@@ -62,7 +62,7 @@ bool CDkCsv::Import ()
 
 	if (!file.is_open ())
 		{
-		debug_logger<minimal>::log ("Unable to open file");
+		std::cout << "Unable to open DK file '" << m_filename << "\n";
 		return false;
 		}
 	
@@ -108,7 +108,7 @@ bool CRgCsv::Import ()
 
 	if (!file.is_open ())
 		{
-		debug_logger<minimal>::log ("Unable to open file");
+		std::cout << "Unable to open RG file '" << m_filename << "\n";
 		return false;
 		}
 

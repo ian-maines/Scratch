@@ -66,6 +66,7 @@ inline dk_player_data_t dk_csv_str_to_player_data (const csv::line_t& player)
 	dk_player_data_t rv;
 	rv.name = player[static_cast<size_t>(dk_data_loc::name)];
 	rv.position = string_to_pos (player[static_cast<size_t>(dk_data_loc::position)]);
+	rv.str_position = player[static_cast<size_t>(dk_data_loc::position)];
 	rv.salary = atoi (player[static_cast<size_t>(dk_data_loc::salary)].c_str ());
 	rv.appg = atof (player[static_cast<size_t>(dk_data_loc::appg)].c_str ());
 
