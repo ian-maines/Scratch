@@ -1,0 +1,23 @@
+std::pair<std::vector::iterator, std::vector::iterator> func (const std::vector& v, const int sum)
+	{
+	if (v.size () < 2)
+		{
+		throw std::exception;
+		}
+		
+	for (auto i = v.begin (); i != v.end () - 1; ++i)
+		{
+		for auto (j = i + 1; j != v.end (); ++j)
+			{
+			if (*i + *j > sum)
+				{
+				throw std::exception;
+				}
+			if (*i + *j == sum)
+				{
+				return std::make_pair(i, j);
+				}
+			}
+		}
+	throw std::exception;
+	}
