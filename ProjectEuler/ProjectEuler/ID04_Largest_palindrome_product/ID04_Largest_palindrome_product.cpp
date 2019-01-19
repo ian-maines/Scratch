@@ -27,7 +27,22 @@ namespace
 		//	1. Convert to string.
 		//	2. Loop over string comparing complimentary digits
 		
+		// Going to do it by converting to a string.
+		// Largest a 32-bit number can be is 4294967295, so 10 digits + one for the null
+		char str[11];
+		_itoa_s (p, str, _countof(str), 10);// The 10 means display in decimal
 
+		// Now we need to compare
+		const size_t len = strlen(str);
+		for (uint16_t i = 0; i < len / 2; ++i)
+			{
+			if (str[i] != str[len - i - 1])
+				{
+				return false;
+				}
+			}
+		std::cout << "Palindrome = " << str << std::endl;
+		return true;
 		}
 	}
 
@@ -51,14 +66,17 @@ int main ()
 		{
 		std::for_each (three_digit_numbers.begin () + pos, three_digit_numbers.end (), [&num, &largest](uint16_t second) 
 			{
-			auto prod = num*second;
+			uint32_t prod = num*second;
 			if (is_palindrome (prod))
 				{
 				if (prod > largest)
 					{
 					largest = prod;
+					std::cout << "Updated largest to " << largest << std::endl;
 					}
 				}
 			});
 		});
+
+	std::cout << "Largest Palindrome = " << largest << std::endl;
 	}
