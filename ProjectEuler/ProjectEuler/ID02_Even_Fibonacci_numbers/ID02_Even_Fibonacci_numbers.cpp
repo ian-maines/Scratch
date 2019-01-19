@@ -22,9 +22,22 @@ int main()
 	uint32_t prev = 0;
 	uint32_t current = 1;
 
+	uint64_t sum = 0;
+
 	while (current < 4'000'000)
 		{
-		
+		// Math portion of the loop
+		if (current % 2 == 0)
+			{
+			sum+=current;
+			}
+
+		// Update
+		auto temp_current = current;
+		current=current+prev;
+		prev = temp_current;
 		}
+
+	std::cout << "Answer: " << sum << std::endl;
 
 	}
