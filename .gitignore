@@ -28,6 +28,7 @@
 *.app
 
 # VS2013 stuff
+*.db
 *.opensdf
 *.sdf
 *.suo
