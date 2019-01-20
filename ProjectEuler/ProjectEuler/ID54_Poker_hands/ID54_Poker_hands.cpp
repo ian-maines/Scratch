@@ -7,6 +7,8 @@
 #include <vector>
 #include <fstream>
 #include <string>
+#include <sstream>
+#include <algorithm>
 
 /* https://projecteuler.net/problem=54
 In the card game poker, a hand consists of five cards and are ranked, from lowest to highest, in the following way:
@@ -91,14 +93,21 @@ namespace
 	class CCard
 		{
 		public:
-			CCard (suit_t suit, value_t value)
-				: m_suit (suit)
-				, m_value (value)
+			CCard (value_t value, suit_t suit)
+				: m_value (value)
+				, m_suit (suit)
 				{}
 
+			std::string print () const
+				{
+				char str[3];
+				sprintf_s (str, "%c%c", m_value, m_suit);
+				return std::string(str);
+				}
+
 		private:
-			const suit_t m_suit;
 			const value_t m_value;
+			const suit_t m_suit;
 		};
 	class CHand
 		{
@@ -108,6 +117,19 @@ namespace
 			CHand (const hand_t&& hand)
 				: m_hand (hand)
 				{}
+
+			std::string print () const
+				{
+				std::stringstream sstr;
+				std::for_each (m_hand.begin (), m_hand.end (), [&sstr](const CCard& card)
+					{
+					sstr << card.print() << "";
+					});
+				std::string str (sstr.str());
+				// remove trailing space character
+				str.erase(str.end () - 1);
+				return str;
+				}
 
 		private:
 			hand_t m_hand;
@@ -120,6 +142,14 @@ namespace
 				: m_p1 (Player1)
 				, m_p2 (Player2)
 				{}
+
+			std::string print () const
+				{
+				std::stringstream ss;
+				ss << m_p1.print () << " " << m_p2.print();
+				return ss.str();
+				}
+
 		private:
 			CHand m_p1;
 			CHand m_p2;
@@ -150,13 +180,14 @@ namespace file_reader
 			for (int i = 0; i < 10; ++i)
 				{
 				int index = 3*i;
-				all_cards.push_back(CCard(suit_t(line[index]), value_t(line[index+1])));
+				all_cards.push_back(CCard(value_t (line[index]), suit_t (line[index + 1])));
 				}
 
 			tournament.push_back (CMatch (
 										CHand (CHand::hand_t (all_cards.begin (), all_cards.begin () + 5)),
 										CHand (CHand::hand_t (all_cards.begin () + 5, all_cards.end ()))
 								 ));
+			std::cout << tournament.back().print() << std::endl;
 			}
 		return tournament;
 		}
