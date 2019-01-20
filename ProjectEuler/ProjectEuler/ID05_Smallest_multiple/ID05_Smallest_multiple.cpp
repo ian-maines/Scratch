@@ -46,5 +46,6 @@ namespace
 int main()
 	{
 
-
+	std::cout << "Smallest multiple = " << find_smallest_number (20) << std::endl;
+	return 0;
 	}
