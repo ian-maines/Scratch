@@ -109,6 +109,10 @@ namespace
 			const value_t m_value;
 			const suit_t m_suit;
 		};
+
+	// TODO: Hand valuation.
+	// We need a way to organize the rules for how a hand wins in such a way that judging hands is fairly clear and straightforward
+
 	class CHand
 		{
 		public:
@@ -123,7 +127,7 @@ namespace
 				std::stringstream sstr;
 				std::for_each (m_hand.begin (), m_hand.end (), [&sstr](const CCard& card)
 					{
-					sstr << card.print() << "";
+					sstr << card.print() << " ";
 					});
 				std::string str (sstr.str());
 				// remove trailing space character
