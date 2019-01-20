@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <vector>
 #include <fstream>
+#include <string>
 
 /* https://projecteuler.net/problem=54
 In the card game poker, a hand consists of five cards and are ranked, from lowest to highest, in the following way:
@@ -64,8 +65,8 @@ namespace
 	enum suit_t
 		{
 		// Using the letter used to represent the suit in the file
-		Ace = 'A',
 		Clubs = 'C',
+		Diamonds = 'D',
 		Hearts = 'H',
 		Spades = 'S',
 		};
@@ -104,8 +105,12 @@ namespace
 		public:
 			using hand_t = std::vector<CCard>;
 
-		private:
+			CHand (const hand_t&& hand)
+				: m_hand (hand)
+				{}
 
+		private:
+			hand_t m_hand;
 		};
 
 	class CMatch
@@ -128,10 +133,50 @@ namespace file_reader
 	tournament_t read_file (const std::string& fname)
 		{
 		tournament_t tournament;
+		std::ifstream ifs;
+		ifs.open (fname);
 
+		if (ifs.rdstate () & std::ifstream::failbit)
+			{
+			throw std::exception ("Unable to open file!");
+			}
+
+		std::string line;
+		while (std::getline (ifs, line))
+			{
+			// Each line consists of 10 cards, the first 5 being player 1, the next 5 being player 2
+			// Cards are space-delimited.
+			CHand::hand_t all_cards;
+			for (int i = 0; i < 10; ++i)
+				{
+				int index = 3*i;
+				all_cards.push_back(CCard(suit_t(line[index]), value_t(line[index+1])));
+				}
+
+			tournament.push_back (CMatch (
+										CHand (CHand::hand_t (all_cards.begin (), all_cards.begin () + 5)),
+										CHand (CHand::hand_t (all_cards.begin () + 5, all_cards.end ()))
+								 ));
+			}
+		return tournament;
 		}
 	}
 
 int main()
 	{
+	tournament_t t;
+	try
+		{
+		t = file_reader::read_file (std::string ("..\\ID54_Poker_hands\\poker.txt"));
+		}
+	catch (std::exception& e)
+		{
+		std::cout << "Exception: '" << e.what() << "'" << std::endl;
+		}
+	catch (...)
+		{
+		std::cout << "Unexpected exception type" << std::endl;
+		}
+
+	return 0;
 	}
