@@ -2,6 +2,7 @@
 #pragma once
 
 #include <algorithm>
+#include <set>
 
 #include "card.h"
 
@@ -25,32 +26,7 @@ Royal Flush : Ten, Jack, Queen, King, Ace, in same suit.
 class CEvaluator
 	{
 	public:
-
-
-	private:
-		bool _IsRoyalFlush (const CHand& hand)
-			{
-			if (_IsFlush (hand))
-				{
-
-				}
-			return false;
-			}
-
-		bool _IsFlush (const CHand& hand)
-			{
-			bool bFlush = true;
-			const CHand::hand_t& h (hand.get ());
-			suit_t last_suit = h.front ().GetSuit ();
-			std::for_each (h.begin (), h.end (), [&bFlush, &last_suit](const CCard& card)
-				{
-				if (card.GetSuit () != last_suit)
-					{
-					bFlush = false;
-					}
-				last_suit = card.GetSuit ();
-				});
-
-			return bFlush;
-			}
+		static bool IsFlush (const CHand& hand);
+		static bool IsStraightFlush (const CHand& hand);
+		static bool IsRoyalFlush (const CHand& hand);
 	};

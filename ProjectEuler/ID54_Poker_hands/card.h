@@ -32,6 +32,12 @@ enum value_t
 	Ace = 'A',
 	};
 
+bool operator< (const value_t& rhs, const value_t lhs)
+	{
+	std::vector<value_t> order = {Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace};
+
+	}
+
 class CCard
 	{
 	public:
@@ -62,7 +68,12 @@ class CHand
 
 		CHand (const hand_t&& hand)
 			: m_hand (hand)
-			{}
+			{
+			if (hand.size () != 5)
+				{
+				throw std::exception ("Expect hand size of 5");
+				}
+			}
 
 		std::string print () const
 			{
