@@ -1,6 +1,4 @@
-// ID02_Even_Fibonacci_numbers.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
+// Copyright 2019 Ian Maines
 #include "pch.h"
 #include <iostream>
 

@@ -1,6 +1,4 @@
-// ID04_Largest_palindrome_product.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
+// Copyright 2019 Ian Maines
 #include "pch.h"
 #include <iostream>
 #include <cstdint>
