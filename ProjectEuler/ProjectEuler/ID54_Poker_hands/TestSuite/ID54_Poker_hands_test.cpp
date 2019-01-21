@@ -4,8 +4,8 @@
 #include "pch.h"
 #include <iostream>
 
-#include "..\..\card.h"
-#include "..\..\evaluator.h"
+#include "test_card.h"
+#include "test_evaluator.h"
 
 int main()
 {
