@@ -153,6 +153,8 @@
   <ItemGroup>
     <ClInclude Include="card.h" />
     <ClInclude Include="evaluator.h" />
+    <ClInclude Include="file_reader.h" />
+    <ClInclude Include="game.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>

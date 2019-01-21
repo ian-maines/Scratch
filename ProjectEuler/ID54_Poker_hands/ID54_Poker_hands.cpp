@@ -5,13 +5,14 @@
 #include <iostream>
 #include <cstdint>
 #include <vector>
-#include <fstream>
 #include <string>
 #include <sstream>
 #include <algorithm>
 
 #include "card.h"
 #include "evaluator.h"
+#include "game.h"
+#include "file_reader.h"
 
 /* https://projecteuler.net/problem=54
 In the card game poker, a hand consists of five cards and are ranked, from lowest to highest, in the following way:
@@ -68,63 +69,8 @@ How many hands does Player 1 win?
 namespace
 	{
 
-	class CMatch
-		{
-		public:
-			CMatch (const CHand& Player1, const CHand& Player2)
-				: m_p1 (Player1)
-				, m_p2 (Player2)
-				{}
-
-			std::string print () const
-				{
-				std::stringstream ss;
-				ss << m_p1.print () << " " << m_p2.print();
-				return ss.str();
-				}
-
-		private:
-			CHand m_p1;
-			CHand m_p2;
-		};
-
-	using tournament_t = std::vector<CMatch>;
 	}
 
-namespace file_reader
-	{
-	tournament_t read_file (const std::string& fname)
-		{
-		tournament_t tournament;
-		std::ifstream ifs;
-		ifs.open (fname);
-
-		if (ifs.rdstate () & std::ifstream::failbit)
-			{
-			throw std::exception ("Unable to open file!");
-			}
-
-		std::string line;
-		while (std::getline (ifs, line))
-			{
-			// Each line consists of 10 cards, the first 5 being player 1, the next 5 being player 2
-			// Cards are space-delimited.
-			CHand::hand_t all_cards;
-			for (int i = 0; i < 10; ++i)
-				{
-				int index = 3*i;
-				all_cards.push_back(CCard(value_t (line[index]), suit_t (line[index + 1])));
-				}
-
-			tournament.push_back (CMatch (
-										CHand (CHand::hand_t (all_cards.begin (), all_cards.begin () + 5)),
-										CHand (CHand::hand_t (all_cards.begin () + 5, all_cards.end ()))
-								 ));
-			std::cout << tournament.back().print() << std::endl;
-			}
-		return tournament;
-		}
-	}
 
 int main()
 	{
