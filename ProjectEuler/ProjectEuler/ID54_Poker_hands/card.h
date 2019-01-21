@@ -2,6 +2,9 @@
 #pragma once
 
 #include <string>
+#include <vector>
+#include <sstream>
+#include <algorithm>
 
 enum suit_t
 	{
@@ -22,7 +25,7 @@ enum value_t
 	Seven,
 	Eight,
 	Nine,
-	Ten,
+	Ten = 'T',
 	Jack = 'J',
 	Queen = 'Q',
 	King = 'K',
@@ -50,4 +53,32 @@ class CCard
 	private:
 		const value_t m_value;
 		const suit_t m_suit;
+	};
+
+class CHand
+	{
+	public:
+		using hand_t = std::vector<CCard>;
+
+		CHand (const hand_t&& hand)
+			: m_hand (hand)
+			{}
+
+		std::string print () const
+			{
+			std::stringstream sstr;
+			std::for_each (m_hand.begin (), m_hand.end (), [&sstr](const CCard& card)
+				{
+				sstr << card.print () << " ";
+				});
+			std::string str (sstr.str ());
+			// remove trailing space character
+			str.erase (str.end () - 1);
+			return str;
+			}
+
+		const hand_t& get () const { return m_hand; }
+
+	private:
+		hand_t m_hand;
 	};
