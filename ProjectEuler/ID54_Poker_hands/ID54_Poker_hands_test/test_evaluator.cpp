@@ -4,6 +4,8 @@
 #include "pch.h"
 #include "..\evaluator.h"
 
+using namespace card;
+
 namespace data
 	{
 	// Hands for flush testing

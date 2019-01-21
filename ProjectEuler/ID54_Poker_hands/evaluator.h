@@ -22,6 +22,7 @@ Four of a Kind : Four cards of the same value.
 Straight Flush : All cards are consecutive values of same suit.
 Royal Flush : Ten, Jack, Queen, King, Ace, in same suit.
 */
+using namespace card;
 
 class CEvaluator
 	{

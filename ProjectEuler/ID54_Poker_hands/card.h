@@ -6,6 +6,9 @@
 #include <sstream>
 #include <algorithm>
 
+
+namespace card
+{
 enum suit_t
 	{
 	// Using the letter used to represent the suit in the file
@@ -32,27 +35,38 @@ enum value_t
 	Ace = 'A',
 	};
 
-
-static const std::vector<value_t> value_order = { Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace };
-
-
-static bool operator== (const value_t& rhs, const value_t lhs)
-	{
-	return static_cast<size_t>(rhs) == static_cast<size_t>(lhs);
-	}
-
-static bool operator< (const value_t& rhs, const value_t lhs)
+static const std::vector<char> value_order = { Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace };
+static bool op_lt(const value_t& rhs, const value_t lhs)	// FIXME NAME
 	{
 	// Sorted in ascending value. Vector iterators support value comparsons
-	auto i_rhs = std::find(value_order.begin(), value_order.end(), rhs);
-	auto i_lhs = std::find(value_order.begin (), value_order.end(), lhs);
+	// Can't use std::find because it would rely on.. well this operator.
+	// Go with O(n) for now. Fairly small number of cards
+	auto i_rhs = value_order.begin ();
+	while (i_rhs != value_order.end ()) { if (*i_rhs == rhs) { break; } }
+	auto i_lhs = value_order.begin ();
+	while (i_lhs != value_order.end ()) { if (*i_lhs == lhs) { break; } }
+
 	if (i_rhs == value_order.end () || i_lhs == value_order.end ())
 		{
 		throw std::exception ("Unexpected value");
 		}
 
 	return i_rhs < i_lhs;
+	};
+
+/*
+static bool operator<(const value_t& rhs, const value_t lhs)
+	{
+	return op_lt(rhs, lhs);
 	}
+struct value_comparitor_t
+	{
+	bool operator() (const value_t& rhs, const value_t lhs)
+		{
+		return op_lt (rhs, lhs);
+		}
+	};
+	*/
 
 class CCard
 	{
@@ -72,9 +86,23 @@ class CCard
 		value_t GetValue () const { return m_value; }
 		suit_t GetSuit () const { return m_suit; }
 
+		bool operator< (const CCard& rhs)
+			{
+			static const std::vector<char> value_order = { Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace };
+			// Return true if we're less than rhs.
+			std::vector<char>::const_iterator i_lhs = value_order.begin ();	// Us
+			std::vector<char>::const_iterator i_rhs = value_order.begin ();
+
+			// Can't use std::find because list isn't value-sorted and won't yield the result we want.
+			while (i_lhs != value_order.end ()) { if (*i_lhs == GetValue ()) { break; } ++i_lhs; }
+			while (i_rhs != value_order.end ()) { if (*i_rhs == rhs.GetValue ()) { break; } ++i_rhs; }
+
+			return i_lhs < i_rhs;
+			}
+
 	private:
-		const value_t m_value;
-		const suit_t m_suit;
+		value_t m_value;
+		suit_t m_suit;
 	};
 
 class CHand
@@ -109,3 +137,4 @@ class CHand
 	private:
 		hand_t m_hand;
 	};
+}// namespace card

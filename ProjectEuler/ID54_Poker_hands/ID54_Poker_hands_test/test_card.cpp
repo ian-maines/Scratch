@@ -3,6 +3,8 @@
 #include "pch.h"
 #include "..\card.h"
 
+using namespace card;
+
 namespace
 	{
 	TEST (CCard, Constructor)
