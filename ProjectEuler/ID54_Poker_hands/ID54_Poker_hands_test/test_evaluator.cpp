@@ -31,6 +31,12 @@ namespace
 		EXPECT_EQ (false, CEvaluator::IsFlush (data::not_flush));
 		}
 
+	TEST (CEvaluator, IsStraightFlush)
+		{
+		EXPECT_EQ (true, CEvaluator::IsStraightFlush(data::royal_flush_diamonds));
+		EXPECT_EQ (false, CEvaluator::IsStraightFlush (data::flush_clubs));
+		}
+
 	TEST (CEvaluator, IsRoyalFlush)
 		{
 		EXPECT_EQ (true, CEvaluator::IsRoyalFlush (data::royal_flush_spades));

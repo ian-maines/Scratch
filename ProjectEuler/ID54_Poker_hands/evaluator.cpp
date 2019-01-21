@@ -21,11 +21,28 @@ bool CEvaluator::IsFlush (const CHand& hand)
 
 bool CEvaluator::IsStraightFlush (const CHand& hand)
 	{
-	CHand::hand_t h = hand;
-
-	std::sort (h.begin (), h.end (), []() 
+	if (IsFlush (hand))
 		{
-		});
+		CHand::hand_t h = hand.get();
+		std::sort (h.begin (), h.end ());	// Rely on operator< defined in card.h
+		
+		bool bStraight = true;
+		for (size_t i = 0; i < h.size () - 1; ++i)
+			{
+			// Find the iterator to the current and next cards as they appear in the value order list.
+			auto i_cur = std::find(value_order.begin(), value_order.end(), h[i]);
+			auto i_next = std::find (value_order.begin (), value_order.end (), h[i+1]);
+			if (i_cur == value_order.end () || i_next == value_order.end ())
+				{
+				throw std::exception ("Unexpected value");
+				}
+			if (*(i_cur + 1) != *i_next)
+				{
+				bStraight = false;
+				}
+			}
+		}
+	return false;
 	}
 
 bool CEvaluator::IsRoyalFlush (const CHand& hand)

@@ -29,6 +29,8 @@
 
 # VS2013 stuff
 **/.vs/
+**/_intermediate/
+**/_buildoutput/
 *.db
 *.opensdf
 *.sdf

@@ -32,10 +32,26 @@ enum value_t
 	Ace = 'A',
 	};
 
-bool operator< (const value_t& rhs, const value_t lhs)
-	{
-	std::vector<value_t> order = {Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace};
 
+static const std::vector<value_t> value_order = { Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace };
+
+
+static bool operator== (const value_t& rhs, const value_t lhs)
+	{
+	return static_cast<size_t>(rhs) == static_cast<size_t>(lhs);
+	}
+
+static bool operator< (const value_t& rhs, const value_t lhs)
+	{
+	// Sorted in ascending value. Vector iterators support value comparsons
+	auto i_rhs = std::find(value_order.begin(), value_order.end(), rhs);
+	auto i_lhs = std::find(value_order.begin (), value_order.end(), lhs);
+	if (i_rhs == value_order.end () || i_lhs == value_order.end ())
+		{
+		throw std::exception ("Unexpected value");
+		}
+
+	return i_rhs < i_lhs;
 	}
 
 class CCard
