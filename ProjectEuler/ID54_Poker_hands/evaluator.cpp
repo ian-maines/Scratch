@@ -43,6 +43,7 @@ bool CEvaluator::IsStraightFlush (const CHand& hand)
 				bStraight = false;
 				}
 			}
+		return bStraight;
 		}
 	return false;
 	}
@@ -78,4 +79,18 @@ bool CEvaluator::IsRoyalFlush (const CHand& hand)
 			}
 		}
 	return false;
+	}
+
+bool Has4OfAKind (const CHand& hand)
+	{
+	std::set<value_t> values;
+
+	const CHand::hand_t& h = hand.get ();
+	std::for_each (h.begin (), h.end (), [&values](const CCard& c)
+		{
+		values.insert(c.GetValue ());
+		});
+
+	// In a hand with a 4-of-a-kind, there will only be two different values in the hand: 4 of whatever the four-of-a-kind is, and one for whatever the remaining card is.
+	return values.size () == 2;
 	}

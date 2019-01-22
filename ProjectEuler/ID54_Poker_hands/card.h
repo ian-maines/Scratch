@@ -86,7 +86,8 @@ class CCard
 		value_t GetValue () const { return m_value; }
 		suit_t GetSuit () const { return m_suit; }
 
-		bool operator< (const CCard& rhs)
+		// Needed to sort and rank cards by face value since we use the underlying value of the enum as the char representation of the card and not its rank.
+		bool operator< (const CCard& rhs) const
 			{
 			static const std::vector<char> value_order = { Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace };
 			// Return true if we're less than rhs.
@@ -98,6 +99,22 @@ class CCard
 			while (i_rhs != value_order.end ()) { if (*i_rhs == rhs.GetValue ()) { break; } ++i_rhs; }
 
 			return i_lhs < i_rhs;
+			}
+
+		// For consistency since we have operator<
+		bool operator== (const CCard& rhs) const
+			{
+			return (m_value == rhs.m_value) && (m_suit == rhs.m_suit);
+			}
+
+		bool operator!= (const CCard& rhs)
+			{
+			return !(*this == rhs);
+			}
+
+		bool operator> (const CCard& rhs)
+			{
+			return (*this != rhs) && (!(*this < rhs));
 			}
 
 	private:

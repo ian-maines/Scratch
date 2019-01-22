@@ -30,4 +30,5 @@ class CEvaluator
 		static bool IsFlush (const CHand& hand);
 		static bool IsStraightFlush (const CHand& hand);
 		static bool IsRoyalFlush (const CHand& hand);
+		static bool Has4OfAKind (const CHand& hand);
 	};
