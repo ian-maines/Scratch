@@ -1,5 +1,6 @@
 // Copyright 2019 Ian Maines
 #include "pch.h"
+#include <map>
 #include "evaluator.h"
 
 using namespace card;
@@ -92,5 +93,9 @@ bool CEvaluator::Has4OfAKind (const CHand& hand)
 		});
 
 	// In a hand with a 4-of-a-kind, there will only be two different values in the hand: 4 of whatever the four-of-a-kind is, and one for whatever the remaining card is.
-	return values.size () == 2;
+	if (values.size () == 2)
+		{
+		// The other case where this could happen is a full house
+		// Need to determine if we have a full house.
+		}
 	}
