@@ -32,6 +32,20 @@ namespace data
 	const CHand straight_flush_nine_clubs (CHand::hand_t{ CCard (value_t::King, suit_t::Clubs), CCard (value_t::Nine, suit_t::Clubs), CCard (value_t::Ten, suit_t::Clubs),
 							 CCard (value_t::Queen, suit_t::Clubs), CCard (value_t::Jack, suit_t::Clubs) });
 	// Hands for 4 of a kind
+	const CHand four_oak_kings (CHand::hand_t{ CCard (value_t::King, suit_t::Clubs), CCard (value_t::King, suit_t::Diamonds), CCard (value_t::King, suit_t::Spades),
+							 CCard (value_t::King, suit_t::Hearts), CCard (value_t::Jack, suit_t::Clubs) });
+	const CHand four_oak_twos (CHand::hand_t{ CCard (value_t::Two, suit_t::Clubs), CCard (value_t::Two, suit_t::Diamonds), CCard (value_t::Two, suit_t::Spades),
+							 CCard (value_t::Two, suit_t::Hearts), CCard (value_t::Four, suit_t::Clubs) });
+	const CHand four_oak_nines (CHand::hand_t{ CCard (value_t::Nine, suit_t::Clubs), CCard (value_t::Nine, suit_t::Diamonds), CCard (value_t::Nine, suit_t::Spades),
+							 CCard (value_t::Nine, suit_t::Hearts), CCard (value_t::Seven, suit_t::Clubs) });
+
+	// Full houses
+	const CHand full_house_ka (CHand::hand_t{ CCard (value_t::King, suit_t::Clubs), CCard (value_t::King, suit_t::Diamonds), CCard (value_t::Ace, suit_t::Spades),
+							 CCard (value_t::Ace, suit_t::Hearts), CCard (value_t::Ace, suit_t::Clubs) });
+	const CHand full_house_59 (CHand::hand_t{ CCard (value_t::Five, suit_t::Clubs), CCard (value_t::Five, suit_t::Diamonds), CCard (value_t::Five, suit_t::Spades),
+							 CCard (value_t::Nine, suit_t::Hearts), CCard (value_t::Nine, suit_t::Clubs) });
+	const CHand full_house_23 (CHand::hand_t{ CCard (value_t::Two, suit_t::Clubs), CCard (value_t::Three, suit_t::Diamonds), CCard (value_t::Two, suit_t::Spades),
+							 CCard (value_t::Three, suit_t::Hearts), CCard (value_t::Two, suit_t::Diamonds) });
 	}
 
 namespace
@@ -71,6 +85,15 @@ namespace
 
 	TEST (CEvaluator, Has4OfAKind)
 		{
+		EXPECT_EQ (true, CEvaluator::Has4OfAKind (data::four_oak_kings));
+		EXPECT_EQ (true, CEvaluator::Has4OfAKind (data::four_oak_twos));
+		EXPECT_EQ (true, CEvaluator::Has4OfAKind (data::four_oak_nines));
 
+		EXPECT_EQ (false, CEvaluator::Has4OfAKind (data::royal_flush_diamonds));
+		EXPECT_EQ (false, CEvaluator::Has4OfAKind (data::straight_flush_four_diamonds));
+		EXPECT_EQ (false, CEvaluator::Has4OfAKind (data::not_flush));
+		EXPECT_EQ (false, CEvaluator::Has4OfAKind (data::flush_clubs));
+		EXPECT_EQ (false, CEvaluator::Has4OfAKind (data::royal_flush_suit_mismatch));
+		EXPECT_EQ (false, CEvaluator::Has4OfAKind (data::full_house_59));
 		}
 	}

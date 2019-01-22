@@ -54,20 +54,6 @@ static bool op_lt(const value_t& rhs, const value_t lhs)	// FIXME NAME
 	return i_rhs < i_lhs;
 	};
 
-/*
-static bool operator<(const value_t& rhs, const value_t lhs)
-	{
-	return op_lt(rhs, lhs);
-	}
-struct value_comparitor_t
-	{
-	bool operator() (const value_t& rhs, const value_t lhs)
-		{
-		return op_lt (rhs, lhs);
-		}
-	};
-	*/
-
 class CCard
 	{
 	public:
@@ -87,6 +73,9 @@ class CCard
 		suit_t GetSuit () const { return m_suit; }
 
 		// Needed to sort and rank cards by face value since we use the underlying value of the enum as the char representation of the card and not its rank.
+		// **** NOTE ****: This implementation means that CCard is not suitable for use in data structures
+		//				   such as std::set or std::map if the comparitive operators (<,>,==,!=) need to account for both suit and face value.
+		//				   Use those containers with card_absolute_compare_t
 		bool operator< (const CCard& rhs) const
 			{
 			static const std::vector<char> value_order = { Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace };
@@ -122,6 +111,28 @@ class CCard
 		suit_t m_suit;
 	};
 
+struct card_absolute_compare_t
+	{
+	bool operator() (const CCard& lhs, const CCard& rhs)
+		{
+		// Cards are first ordered by value, then by suit
+		if (rhs.GetValue () == lhs.GetValue ())
+			{
+			// For this operation, we rank suits in ascending order as Clubs,Diamonds,Hearts,Spades
+			static const std::vector<char> suit_value_order = { Clubs, Diamonds, Hearts, Spades };
+			std::vector<char>::const_iterator i_lhs = suit_value_order.begin ();	// Us
+			std::vector<char>::const_iterator i_rhs = suit_value_order.begin ();
+
+			// Can't use std::find because list isn't value-sorted and won't yield the result we want.
+			while (i_lhs != suit_value_order.end ()) { if (*i_lhs == lhs.GetSuit ()) { break; } ++i_lhs; }
+			while (i_rhs != suit_value_order.end ()) { if (*i_rhs == rhs.GetSuit ()) { break; } ++i_rhs; }
+
+			return i_lhs < i_rhs;
+			}
+		return lhs < rhs;
+		}
+	};
+
 class CHand
 	{
 	public:
@@ -133,6 +144,13 @@ class CHand
 			if (hand.size () != 5)
 				{
 				throw std::exception ("Expect hand size of 5");
+				}
+			// Can'd have duplicate cards
+			std::set<CCard, card_absolute_compare_t> cards;
+			std::for_each (m_hand.begin (), m_hand.end (), [&cards](const CCard& c) { cards.insert(c);});
+			if (cards.size () != 5)
+				{
+				throw std::exception ("Faulty deck: Two identical cards.");
 				}
 			}
 

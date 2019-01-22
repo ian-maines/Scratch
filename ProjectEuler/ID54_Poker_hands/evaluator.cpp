@@ -81,7 +81,7 @@ bool CEvaluator::IsRoyalFlush (const CHand& hand)
 	return false;
 	}
 
-bool Has4OfAKind (const CHand& hand)
+bool CEvaluator::Has4OfAKind (const CHand& hand)
 	{
 	std::set<value_t> values;
 
