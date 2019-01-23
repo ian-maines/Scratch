@@ -52,6 +52,29 @@ namespace data
 							 CCard (value_t::Ace, suit_t::Hearts), CCard (value_t::Two, suit_t::Clubs) });
 	const CHand three_oak_fives (CHand::hand_t{ CCard (value_t::Five, suit_t::Clubs), CCard (value_t::Six, suit_t::Diamonds), CCard (value_t::Five, suit_t::Spades),
 							 CCard (value_t::Five, suit_t::Hearts), CCard (value_t::Four, suit_t::Clubs) });
+
+	// Two Pair
+	const CHand two_pair_2s_5s (CHand::hand_t{ CCard (value_t::Two, suit_t::Spades), CCard (value_t::Five, suit_t::Spades), CCard (value_t::Five, suit_t::Hearts),
+							 CCard (value_t::Two, suit_t::Diamonds), CCard (value_t::Six, suit_t::Spades) });
+	const CHand two_pair_As_Js (CHand::hand_t{ CCard (value_t::Ace, suit_t::Spades), CCard (value_t::Jack, suit_t::Spades), CCard (value_t::Jack, suit_t::Hearts),
+							 CCard (value_t::Ace, suit_t::Diamonds), CCard (value_t::Nine, suit_t::Spades) });
+	const CHand two_pair_Qs_5s (CHand::hand_t{ CCard (value_t::Queen, suit_t::Spades), CCard (value_t::Five, suit_t::Spades), CCard (value_t::Five, suit_t::Hearts),
+							 CCard (value_t::Queen, suit_t::Diamonds), CCard (value_t::Jack, suit_t::Spades) });
+
+	// Pair
+	const CHand pair_9s (CHand::hand_t{ CCard (value_t::Nine, suit_t::Spades), CCard (value_t::Five, suit_t::Spades), CCard (value_t::Nine, suit_t::Hearts),
+							 CCard (value_t::Two, suit_t::Diamonds), CCard (value_t::Six, suit_t::Spades) });
+	const CHand pair_As (CHand::hand_t{ CCard (value_t::Ace, suit_t::Spades), CCard (value_t::Jack, suit_t::Spades), CCard (value_t::Ace, suit_t::Hearts),
+							CCard (value_t::Two, suit_t::Diamonds), CCard (value_t::Three, suit_t::Spades) });
+	const CHand pair_3s (CHand::hand_t{ CCard (value_t::Queen, suit_t::Spades), CCard (value_t::Five, suit_t::Spades), CCard (value_t::Three, suit_t::Hearts),
+							 CCard (value_t::Seven, suit_t::Diamonds), CCard (value_t::Three, suit_t::Spades) });
+	// Straight
+	const CHand straight_3 (CHand::hand_t{ CCard (value_t::Five, suit_t::Spades), CCard (value_t::Three, suit_t::Diamonds), CCard (value_t::Six, suit_t::Hearts),
+							 CCard (value_t::Four, suit_t::Diamonds), CCard (value_t::Seven, suit_t::Spades) });
+	const CHand straight_t (CHand::hand_t{ CCard (value_t::Ace, suit_t::Spades), CCard (value_t::Jack, suit_t::Diamonds), CCard (value_t::Queen, suit_t::Hearts),
+							 CCard (value_t::Ten, suit_t::Diamonds), CCard (value_t::King, suit_t::Spades) });
+	const CHand straight_7 (CHand::hand_t{ CCard (value_t::Jack, suit_t::Spades), CCard (value_t::Eight, suit_t::Diamonds), CCard (value_t::Seven, suit_t::Hearts),
+							 CCard (value_t::Ten, suit_t::Diamonds), CCard (value_t::Nine, suit_t::Spades) });
 	}
 
 namespace
@@ -122,5 +145,84 @@ namespace
 		EXPECT_EQ (false, CEvaluator::Has3OfAKind (data::not_flush));
 		EXPECT_EQ (false, CEvaluator::Has3OfAKind (data::flush_Hearts));
 		EXPECT_EQ (false, CEvaluator::Has3OfAKind (data::straight_flush_six_hearts));
+		}
+
+	TEST (CEvaluator, HasPair)
+		{
+		// Technically 4OAKs are pairs
+		EXPECT_EQ (true, CEvaluator::HasPair (data::four_oak_kings));
+		EXPECT_EQ (true, CEvaluator::HasPair (data::four_oak_twos));
+		EXPECT_EQ (true, CEvaluator::HasPair (data::four_oak_nines));
+		// So are full houses
+		EXPECT_EQ (true, CEvaluator::HasPair (data::full_house_ka));
+		EXPECT_EQ (true, CEvaluator::HasPair (data::full_house_59));
+		EXPECT_EQ (true, CEvaluator::HasPair (data::full_house_23));
+		// as are three of a kinds
+		EXPECT_EQ (true, CEvaluator::HasPair (data::three_oak_fives));
+		EXPECT_EQ (true, CEvaluator::HasPair (data::three_oak_sevens));
+		// As are two pairs
+		EXPECT_EQ (true, CEvaluator::HasPair (data::two_pair_2s_5s));
+		EXPECT_EQ (true, CEvaluator::HasPair (data::two_pair_As_Js));
+		EXPECT_EQ (true, CEvaluator::HasPair (data::two_pair_Qs_5s));
+		// Actua pair
+		EXPECT_EQ (true, CEvaluator::HasPair (data::pair_3s));
+		EXPECT_EQ (true, CEvaluator::HasPair (data::pair_9s));
+		EXPECT_EQ (true, CEvaluator::HasPair (data::pair_As));
+
+		// Not
+		EXPECT_EQ (false, CEvaluator::HasPair (data::royal_flush_diamonds));
+		EXPECT_EQ (false, CEvaluator::HasPair (data::not_flush));
+		EXPECT_EQ (false, CEvaluator::HasPair (data::flush_Hearts));
+		EXPECT_EQ (false, CEvaluator::HasPair (data::straight_flush_six_hearts));
+		}
+
+	TEST (CEvaluator, HasTwoPair)
+		{
+		// actual two pairs
+		EXPECT_EQ (true, CEvaluator::HasTwoPair (data::two_pair_2s_5s));
+		EXPECT_EQ (true, CEvaluator::HasTwoPair (data::two_pair_As_Js));
+		EXPECT_EQ (true, CEvaluator::HasTwoPair (data::two_pair_Qs_5s));
+
+		// Not
+		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::royal_flush_diamonds));
+		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::not_flush));
+		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::flush_Hearts));
+		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::straight_flush_six_hearts));
+		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::four_oak_kings));
+		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::four_oak_twos));
+		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::four_oak_nines));
+		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::pair_3s));
+		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::pair_9s));
+		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::pair_As));
+		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::three_oak_fives));
+		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::three_oak_sevens));
+		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::full_house_ka));
+		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::full_house_59));
+		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::full_house_23));
+		}
+	
+	TEST (CEvaluator, IsStraight)
+		{
+		EXPECT_EQ (true, CEvaluator::IsStraight (data::straight_3));
+		EXPECT_EQ (true, CEvaluator::IsStraight (data::straight_t));
+		EXPECT_EQ (true, CEvaluator::IsStraight (data::straight_7));
+
+		EXPECT_EQ (true, CEvaluator::IsStraight (data::royal_flush_spades));
+		EXPECT_EQ (true, CEvaluator::IsStraight (data::straight_flush_nine_clubs));
+
+		// Not
+		EXPECT_EQ (false, CEvaluator::IsStraight (data::not_flush));
+		EXPECT_EQ (false, CEvaluator::IsStraight (data::flush_Hearts));
+		EXPECT_EQ (false, CEvaluator::IsStraight (data::four_oak_kings));
+		EXPECT_EQ (false, CEvaluator::IsStraight (data::four_oak_twos));
+		EXPECT_EQ (false, CEvaluator::IsStraight (data::four_oak_nines));
+		EXPECT_EQ (false, CEvaluator::IsStraight (data::pair_3s));
+		EXPECT_EQ (false, CEvaluator::IsStraight (data::pair_9s));
+		EXPECT_EQ (false, CEvaluator::IsStraight (data::pair_As));
+		EXPECT_EQ (false, CEvaluator::IsStraight (data::three_oak_fives));
+		EXPECT_EQ (false, CEvaluator::IsStraight (data::three_oak_sevens));
+		EXPECT_EQ (false, CEvaluator::IsStraight (data::full_house_ka));
+		EXPECT_EQ (false, CEvaluator::IsStraight (data::full_house_59));
+		EXPECT_EQ (false, CEvaluator::IsStraight (data::full_house_23));
 		}
 	}

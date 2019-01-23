@@ -23,31 +23,32 @@ bool CEvaluator::IsFlush (const CHand& hand)
 	return bFlush;
 	}
 
+bool CEvaluator::IsStraight (const CHand& hand)
+	{
+	CHand::hand_t h = hand.get ();
+	std::sort (h.begin (), h.end ());	// Rely on operator< defined in card.h
+
+	bool bStraight = true;
+	for (size_t i = 0; i < h.size () - 1; ++i)
+		{
+		// Find the iterator to the current and next cards as they appear in the value order list.
+		auto i_cur = std::find (value_order.begin (), value_order.end (), h[i].GetValue ());
+		auto i_next = std::find (value_order.begin (), value_order.end (), h[i + 1].GetValue ());
+		if (i_cur == value_order.end () || i_next == value_order.end ())
+			{
+			throw std::exception ("Unexpected value");
+			}
+		if (*(i_cur + 1) != *i_next)
+			{
+			bStraight = false;
+			}
+		}
+	return bStraight;
+	}
+
 bool CEvaluator::IsStraightFlush (const CHand& hand)
 	{
-	if (IsFlush (hand))
-		{
-		CHand::hand_t h = hand.get();
-		std::sort (h.begin (), h.end ());	// Rely on operator< defined in card.h
-		
-		bool bStraight = true;
-		for (size_t i = 0; i < h.size () - 1; ++i)
-			{
-			// Find the iterator to the current and next cards as they appear in the value order list.
-			auto i_cur = std::find(value_order.begin(), value_order.end(), h[i].GetValue());
-			auto i_next = std::find (value_order.begin (), value_order.end (), h[i+1].GetValue ());
-			if (i_cur == value_order.end () || i_next == value_order.end ())
-				{
-				throw std::exception ("Unexpected value");
-				}
-			if (*(i_cur + 1) != *i_next)
-				{
-				bStraight = false;
-				}
-			}
-		return bStraight;
-		}
-	return false;
+	return IsStraight (hand) && IsFlush (hand);
 	}
 
 bool CEvaluator::IsRoyalFlush (const CHand& hand)
@@ -88,9 +89,58 @@ bool CEvaluator::Has4OfAKind (const CHand& hand)
 	return _HasXOfAKind (hand, 4);
 	}
 
+bool CEvaluator::IsFullHouse (const CHand& hand)
+	{
+	// We can solve this in a similar manner to _HasXOfAKind
+	std::map<value_t, int> values;
+
+	const CHand::hand_t& h = hand.get ();
+	std::for_each (h.begin (), h.end (), [&values](const CCard& c)
+		{
+		if (values.find (c.GetValue ()) == values.end ())
+			{
+			values.insert (std::make_pair (c.GetValue (), 1));
+			}
+		else
+			{
+			values[c.GetValue ()]++;
+			}
+		});
+
+	bool b3OAK = std::any_of (values.begin (), values.end (), [](const std::pair<value_t, int>& val) {return val.second == 3; });
+	bool bPair = std::any_of (values.begin (), values.end (), [](const std::pair<value_t, int>& val) {return val.second == 2; });
+
+	return b3OAK && bPair;
+	}
+
 bool CEvaluator::Has3OfAKind (const CHand& hand)
 	{
 	return _HasXOfAKind (hand, 3);
+	}
+
+bool CEvaluator::HasTwoPair (const CHand& hand)
+	{
+	// we can do this similar to _HasXOfAKind and IsFullHouse
+	std::map<value_t, int> values;
+
+	const CHand::hand_t& h = hand.get ();
+	std::for_each (h.begin (), h.end (), [&values](const CCard& c)
+		{
+		if (values.find (c.GetValue ()) == values.end ())
+			{
+			values.insert (std::make_pair (c.GetValue (), 1));
+			}
+		else
+			{
+			values[c.GetValue ()]++;
+			}
+		});
+
+	size_t pair_count = 0;
+
+	std::for_each (values.begin (), values.end (), [&pair_count](const std::pair<value_t, int>& val) {if (val.second == 2) { pair_count++; } });
+
+	return pair_count == 2;
 	}
 
 bool CEvaluator::HasPair (const CHand& hand)
@@ -115,6 +165,5 @@ bool CEvaluator::_HasXOfAKind (const CHand& hand, int number)
 			}
 		});
 
-	// In a hand with a 4-of-a-kind, there will only be two different values in the hand: 4 of whatever the four-of-a-kind is, and one for whatever the remaining card is.
-	return std::any_of (values.begin (), values.end (), [&number](const std::pair<value_t, int>& val) {return val.second == number; });
+	return std::any_of (values.begin (), values.end (), [&number](const std::pair<value_t, int>& val) {return val.second >= number; });
 	}
