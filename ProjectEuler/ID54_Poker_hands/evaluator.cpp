@@ -38,7 +38,8 @@ bool CEvaluator::IsStraight (const CHand& hand)
 			{
 			throw std::exception ("Unexpected value");
 			}
-		if (*(i_cur + 1) != *i_next)
+		// If we have a pair of aces, we could have i_cur be the last element in the array, so we don't want to advance it
+		if (i_cur+1 == value_order.end() || *(i_cur + 1) != *i_next)
 			{
 			bStraight = false;
 			}
@@ -146,6 +147,47 @@ bool CEvaluator::HasTwoPair (const CHand& hand)
 bool CEvaluator::HasPair (const CHand& hand)
 	{
 	return _HasXOfAKind (hand, 2);
+	}
+
+int CEvaluator::CompareHands (const CHand& player1, const CHand& player2)
+	{
+	// FIXME: Is there a better way than brute forcing?
+	//Royal flush
+		{
+		const bool p1rf = IsRoyalFlush (player1);
+		const bool p2rf = IsRoyalFlush (player2);
+		if (p1rf && p2rf)
+			{
+			throw std::exception ("Unclear rules for two royal flushes");
+			}
+		if (p1rf) { return 1; }
+		if (p2rf) { return 2; }
+		}
+		
+	// Straight flush
+		{
+		const bool p1sf = IsStraightFlush (player1);
+		const bool p2sf = IsStraightFlush (player2);
+		if (p1sf && p2sf)
+			{
+			throw std::exception ("Unclear rules for two straight flushes");
+			}
+		if (p1sf) { return 1; }
+		if (p1sf) { return 2; }
+		}
+
+	// Four of a kind (high card wins tie, high set of 4 wins tie of that)
+		{
+		const bool p14oak = Has4OfAKind (player1);
+		const bool p24oak = Has4OfAKind (player2);
+		if (p14oak && p24oak)
+			{
+			// FIXME!
+			throw std::exception ("Not implemented");
+			}
+		if (p14oak) { return 1; }
+		if (p24oak) { return 2; }
+		}
 	}
 
 bool CEvaluator::_HasXOfAKind (const CHand& hand, int number)

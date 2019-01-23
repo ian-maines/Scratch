@@ -37,6 +37,9 @@ class CEvaluator
 		static bool HasTwoPair (const CHand& hand);
 		static bool HasPair (const CHand& hand);
 
+		// Returns 1 for player1 wins, 2 for player2 wins
+		static int CompareHands (const CHand& player1, const CHand& player2);
+
 	private:
 		static bool _HasXOfAKind (const CHand& hand, int number);
 	};
