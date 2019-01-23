@@ -46,6 +46,12 @@ namespace data
 							 CCard (value_t::Nine, suit_t::Hearts), CCard (value_t::Nine, suit_t::Clubs) });
 	const CHand full_house_23 (CHand::hand_t{ CCard (value_t::Two, suit_t::Clubs), CCard (value_t::Three, suit_t::Diamonds), CCard (value_t::Two, suit_t::Spades),
 							 CCard (value_t::Three, suit_t::Hearts), CCard (value_t::Two, suit_t::Diamonds) });
+
+	// Three of a kinds
+	const CHand three_oak_sevens (CHand::hand_t{ CCard (value_t::Seven, suit_t::Clubs), CCard (value_t::Seven, suit_t::Diamonds), CCard (value_t::Seven, suit_t::Spades),
+							 CCard (value_t::Ace, suit_t::Hearts), CCard (value_t::Two, suit_t::Clubs) });
+	const CHand three_oak_fives (CHand::hand_t{ CCard (value_t::Five, suit_t::Clubs), CCard (value_t::Six, suit_t::Diamonds), CCard (value_t::Five, suit_t::Spades),
+							 CCard (value_t::Five, suit_t::Hearts), CCard (value_t::Four, suit_t::Clubs) });
 	}
 
 namespace
@@ -95,5 +101,26 @@ namespace
 		EXPECT_EQ (false, CEvaluator::Has4OfAKind (data::flush_clubs));
 		EXPECT_EQ (false, CEvaluator::Has4OfAKind (data::royal_flush_suit_mismatch));
 		EXPECT_EQ (false, CEvaluator::Has4OfAKind (data::full_house_59));
+		}
+
+	TEST (CEvaluator, Has3OfAKind)
+		{
+		// Technically 4OAKs are 3OAKs
+		EXPECT_EQ (true, CEvaluator::Has3OfAKind (data::four_oak_kings));
+		EXPECT_EQ (true, CEvaluator::Has3OfAKind (data::four_oak_twos));
+		EXPECT_EQ (true, CEvaluator::Has3OfAKind (data::four_oak_nines));
+		// So are full houses
+		EXPECT_EQ (true, CEvaluator::Has3OfAKind (data::full_house_ka));
+		EXPECT_EQ (true, CEvaluator::Has3OfAKind (data::full_house_59));
+		EXPECT_EQ (true, CEvaluator::Has3OfAKind (data::full_house_23));
+		// Actual three of a kinds
+		EXPECT_EQ (true, CEvaluator::Has3OfAKind (data::three_oak_fives));
+		EXPECT_EQ (true, CEvaluator::Has3OfAKind (data::three_oak_sevens));
+
+		// Not
+		EXPECT_EQ (false, CEvaluator::Has3OfAKind (data::royal_flush_diamonds));
+		EXPECT_EQ (false, CEvaluator::Has3OfAKind (data::not_flush));
+		EXPECT_EQ (false, CEvaluator::Has3OfAKind (data::flush_Hearts));
+		EXPECT_EQ (false, CEvaluator::Has3OfAKind (data::straight_flush_six_hearts));
 		}
 	}

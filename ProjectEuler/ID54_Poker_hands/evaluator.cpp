@@ -1,6 +1,7 @@
 // Copyright 2019 Ian Maines
 #include "pch.h"
 #include <map>
+#include <algorithm>
 #include "evaluator.h"
 
 using namespace card;
@@ -84,18 +85,36 @@ bool CEvaluator::IsRoyalFlush (const CHand& hand)
 
 bool CEvaluator::Has4OfAKind (const CHand& hand)
 	{
-	std::set<value_t> values;
+	return _HasXOfAKind (hand, 4);
+	}
+
+bool CEvaluator::Has3OfAKind (const CHand& hand)
+	{
+	return _HasXOfAKind (hand, 3);
+	}
+
+bool CEvaluator::HasPair (const CHand& hand)
+	{
+	return _HasXOfAKind (hand, 2);
+	}
+
+bool CEvaluator::_HasXOfAKind (const CHand& hand, int number)
+	{
+	std::map<value_t, int> values;
 
 	const CHand::hand_t& h = hand.get ();
 	std::for_each (h.begin (), h.end (), [&values](const CCard& c)
 		{
-		values.insert(c.GetValue ());
+		if (values.find (c.GetValue ()) == values.end ())
+			{
+			values.insert (std::make_pair (c.GetValue (), 1));
+			}
+		else
+			{
+			values[c.GetValue ()]++;
+			}
 		});
 
 	// In a hand with a 4-of-a-kind, there will only be two different values in the hand: 4 of whatever the four-of-a-kind is, and one for whatever the remaining card is.
-	if (values.size () == 2)
-		{
-		// The other case where this could happen is a full house
-		// Need to determine if we have a full house.
-		}
+	return std::any_of (values.begin (), values.end (), [&number](const std::pair<value_t, int>& val) {return val.second == number; });
 	}
