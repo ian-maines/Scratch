@@ -6,7 +6,7 @@
 
 using namespace card;
 
-bool CEvaluator::IsFlush (const CHand& hand)
+const CEvaluator::flush_t CEvaluator::IsFlush (const CHand& hand)
 	{
 	bool bFlush = true;
 	const CHand::hand_t& h (hand.get ());
@@ -20,10 +20,10 @@ bool CEvaluator::IsFlush (const CHand& hand)
 		last_suit = card.GetSuit ();
 		});
 
-	return bFlush;
+	return flush_t { bFlush, _GetSortedValueSet (hand) };
 	}
 
-bool CEvaluator::IsStraight (const CHand& hand)
+const CEvaluator::straight_t CEvaluator::IsStraight (const CHand& hand)
 	{
 	CHand::hand_t h = hand.get ();
 	std::sort (h.begin (), h.end ());	// Rely on operator< defined in card.h
@@ -44,17 +44,19 @@ bool CEvaluator::IsStraight (const CHand& hand)
 			bStraight = false;
 			}
 		}
-	return bStraight;
+	return straight_t{ bStraight, _GetSortedValueSet(hand).back() };
 	}
 
-bool CEvaluator::IsStraightFlush (const CHand& hand)
+const CEvaluator::str_flush_t CEvaluator::IsStraightFlush (const CHand& hand)
 	{
-	return IsStraight (hand) && IsFlush (hand);
+	bool bIsStraightFlush (IsStraight (hand).bIsStraight && IsFlush (hand).bIsFlush);
+
+	return { bIsStraightFlush, Two };
 	}
 
 bool CEvaluator::IsRoyalFlush (const CHand& hand)
 	{
-	if (IsFlush (hand))
+	if (IsFlush (hand).bIsFlush)
 		{
 		// All cards same suit, now just make sure we have all of the cards accounted for.
 		// std::set is a good way to do this.
@@ -85,12 +87,12 @@ bool CEvaluator::IsRoyalFlush (const CHand& hand)
 	return false;
 	}
 
-bool CEvaluator::Has4OfAKind (const CHand& hand)
+const CEvaluator::four_oak_t CEvaluator::Has4OfAKind (const CHand& hand)
 	{
-	return _HasXOfAKind (hand, 4);
+	return { _HasXOfAKind (hand, 4), Two, Three };
 	}
 
-bool CEvaluator::IsFullHouse (const CHand& hand)
+const CEvaluator::full_house_t CEvaluator::IsFullHouse (const CHand& hand)
 	{
 	// We can solve this in a similar manner to _HasXOfAKind
 	std::map<value_t, int> values;
@@ -111,15 +113,15 @@ bool CEvaluator::IsFullHouse (const CHand& hand)
 	bool b3OAK = std::any_of (values.begin (), values.end (), [](const std::pair<value_t, int>& val) {return val.second == 3; });
 	bool bPair = std::any_of (values.begin (), values.end (), [](const std::pair<value_t, int>& val) {return val.second == 2; });
 
-	return b3OAK && bPair;
+	return { b3OAK && bPair, Two };
 	}
 
-bool CEvaluator::Has3OfAKind (const CHand& hand)
+const CEvaluator::three_oak_t CEvaluator::Has3OfAKind (const CHand& hand)
 	{
-	return _HasXOfAKind (hand, 3);
+	return { _HasXOfAKind (hand, 3), Two, std::vector<value_t> () };
 	}
 
-bool CEvaluator::HasTwoPair (const CHand& hand)
+const CEvaluator::two_pair_t CEvaluator::HasTwoPair (const CHand& hand)
 	{
 	// we can do this similar to _HasXOfAKind and IsFullHouse
 	std::map<value_t, int> values;
@@ -141,12 +143,12 @@ bool CEvaluator::HasTwoPair (const CHand& hand)
 
 	std::for_each (values.begin (), values.end (), [&pair_count](const std::pair<value_t, int>& val) {if (val.second == 2) { pair_count++; } });
 
-	return pair_count == 2;
+	return { pair_count == 2, Three, Two, Four };
 	}
 
-bool CEvaluator::HasPair (const CHand& hand)
+const CEvaluator::pair_t CEvaluator::HasPair (const CHand& hand)
 	{
-	return _HasXOfAKind (hand, 2);
+	return { _HasXOfAKind (hand, 2), Two, std::vector<value_t> () };
 	}
 
 CEvaluator::player_t CEvaluator::CompareHands (const CHand& player1, const CHand& player2)
@@ -166,107 +168,107 @@ CEvaluator::player_t CEvaluator::CompareHands (const CHand& player1, const CHand
 		
 	// Straight flush
 		{
-		const bool p1sf = IsStraightFlush (player1);
-		const bool p2sf = IsStraightFlush (player2);
-		if (p1sf && p2sf)
+		const auto p1sf = IsStraightFlush (player1);
+		const auto p2sf = IsStraightFlush (player2);
+		if (p1sf.bIsStraightFlush && p2sf.bIsStraightFlush)
 			{
 			throw std::exception ("Unclear rules for two straight flushes");
 			}
-		if (p1sf) { return player_1; }
-		if (p2sf) { return player_2; }
+		if (p1sf.bIsStraightFlush) { return player_1; }
+		if (p2sf.bIsStraightFlush) { return player_2; }
 		}
 
 	// Four of a kind (high card wins tie, high set of 4 wins tie of that)
 		{
-		const bool p14oak = Has4OfAKind (player1);
-		const bool p24oak = Has4OfAKind (player2);
-		if (p14oak && p24oak)
+		const auto p14oak = Has4OfAKind (player1);
+		const auto p24oak = Has4OfAKind (player2);
+		if (p14oak.bHas4oak && p24oak.bHas4oak)
 			{
 			// FIXME!
 			throw std::exception ("Not implemented");
 			}
-		if (p14oak) { return player_1; }
-		if (p24oak) { return player_2; }
+		if (p14oak.bHas4oak) { return player_1; }
+		if (p24oak.bHas4oak) { return player_2; }
 		}
 
 	// Full House : Three of a kind and a pair. (high three of a kind wins tie)
 		{
-		const bool p1fh = IsFullHouse (player1);
-		const bool p2fh = IsFullHouse (player2);
-		if (p1fh && p2fh)
+		const auto p1fh = IsFullHouse (player1);
+		const auto p2fh = IsFullHouse (player2);
+		if (p1fh.bIsFullHouse && p2fh.bIsFullHouse)
 			{
 			throw std::exception ("Not implemented");
 			}
-		if (p1fh) { return player_1; }
-		if (p2fh) { return player_2; }		
+		if (p1fh.bIsFullHouse) { return player_1; }
+		if (p2fh.bIsFullHouse) { return player_2; }		
 		}
 
 	// Flush : All cards of the same suit.
 		{
-		const bool p1flush = IsFlush (player1);
-		const bool p2flush = IsFlush (player2);
-		if (p1flush && p2flush)
+		const auto p1flush = IsFlush (player1);
+		const auto p2flush = IsFlush (player2);
+		if (p1flush.bIsFlush && p2flush.bIsFlush)
 			{
 			throw std::exception("not implemented");
 			}
-		if (p1flush) { return player_1; }
-		if (p2flush) { return player_2; }
+		if (p1flush.bIsFlush) { return player_1; }
+		if (p2flush.bIsFlush) { return player_2; }
 		}
 		
 	// Straight : All cards are consecutive values.
 		{
-		const bool p1straight = IsStraight (player1);
-		const bool p2straight = IsStraight (player2);
+		const auto p1straight = IsStraight (player1);
+		const auto p2straight = IsStraight (player2);
 		
-		if (p1straight && p2straight)
+		if (p1straight.bIsStraight && p2straight.bIsStraight)
 			{
 			throw std::exception ("Not implemented");
 			}
 		
-		if (p1straight) { return player_1; }
-		if (p2straight) { return player_2; }
+		if (p1straight.bIsStraight) { return player_1; }
+		if (p2straight.bIsStraight) { return player_2; }
 		}
 
 	// Three of a Kind : Three cards of the same value.
 		{
-		const bool p13oak = Has3OfAKind (player1);
-		const bool p23oak = Has3OfAKind (player2);
+		const auto p13oak = Has3OfAKind (player1);
+		const auto p23oak = Has3OfAKind (player2);
 
-		if (p13oak && p23oak)
+		if (p13oak.bHas3Oak && p23oak.bHas3Oak)
 			{
 			throw std::exception ("Not implemented");
 			}
 
-		if (p13oak) { return player_1; }
-		if (p23oak) { return player_2; }
+		if (p13oak.bHas3Oak) { return player_1; }
+		if (p23oak.bHas3Oak) { return player_2; }
 		}
 
 	// Two Pairs : Two different pairs.
 		{
-		const bool p12pair = HasTwoPair (player1);
-		const bool p22pair = HasTwoPair (player2);
+		const auto p12pair = HasTwoPair (player1);
+		const auto p22pair = HasTwoPair (player2);
 
-		if (p12pair && p22pair)
+		if (p12pair.bHasTwoPair && p22pair.bHasTwoPair)
 			{
 			throw std::exception("Not implemented");
 			}
 
-		if (p12pair) { return player_1; }
-		if (p22pair) { return player_2; }
+		if (p12pair.bHasTwoPair) { return player_1; }
+		if (p22pair.bHasTwoPair) { return player_2; }
 		}
 
 	// One Pair : Two cards of the same value.
 		{
-		const bool p1pair = HasPair (player1);
-		const bool p2pair = HasPair (player2);
+		const auto p1pair = HasPair (player1);
+		const auto p2pair = HasPair (player2);
 
-		if (p1pair && p2pair)
+		if (p1pair.bHasPair && p2pair.bHasPair)
 			{
 			throw std::exception ("Not implemented");
 			}
 
-		if (p1pair) { return player_1; }
-		if (p2pair) { return player_2; }
+		if (p1pair.bHasPair) { return player_1; }
+		if (p2pair.bHasPair) { return player_2; }
 		}
 
 	// High Card : Highest value card.
@@ -290,4 +292,30 @@ bool CEvaluator::_HasXOfAKind (const CHand& hand, int number)
 		});
 
 	return std::any_of (values.begin (), values.end (), [&number](const std::pair<value_t, int>& val) {return val.second >= number; });
+	}
+
+
+CEvaluator::player_t CEvaluator::PlayerWithHighCard (std::vector<value_t> player1, std::vector<value_t> player2)
+	{
+	if (player1.size () == 0 || player2.size () == 0 || player1.size () != player2.size ())
+		{
+		throw std::exception ("Unexpected hand size");
+		}
+
+	auto p1_sorted = _GetSortedValueSet (player1);
+	auto p2_sorted = _GetSortedValueSet (player2);
+	}
+
+const std::vector<value_t> CEvaluator::_GetSortedValueSet (const CHand& hand, std::function<bool (value_t)> pred/* = []() { return false; }*/)
+	{
+	CHand::hand_t copy (hand.get());
+	if (copy.size () == 0)
+		{
+		throw std::exception("Unexpected size");
+		}
+
+	std::sort(copy.begin(), copy.end());
+	std::vector<value_t> rv;
+	std::for_each (copy.begin (), copy.end (), [&rv, &pred](const CCard& c) { if (pred (c.GetValue ())) { rv.push_back (c.GetValue ()); }});
+	return rv;
 	}

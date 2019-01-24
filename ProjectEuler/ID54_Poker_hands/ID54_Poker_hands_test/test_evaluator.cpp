@@ -89,24 +89,28 @@ namespace
 	{
 	TEST (CEvaluator, IsFlush)
 		{
-		EXPECT_EQ (true, CEvaluator::IsFlush (data::flush_clubs));
-		EXPECT_EQ (true, CEvaluator::IsFlush (data::flush_hearts));
-		EXPECT_EQ (false, CEvaluator::IsFlush (data::not_flush));
+		EXPECT_EQ (true, CEvaluator::IsFlush (data::flush_clubs).bIsFlush);
+		EXPECT_EQ (Ace, CEvaluator::IsFlush (data::flush_clubs).sorted_cards.back());
+		EXPECT_EQ (Three, CEvaluator::IsFlush (data::flush_clubs).sorted_cards.back());
+		EXPECT_EQ (true, CEvaluator::IsFlush (data::flush_hearts).bIsFlush);
+		EXPECT_EQ (false, CEvaluator::IsFlush (data::not_flush).bIsFlush);
 		}
 
 	TEST (CEvaluator, IsStraightFlush)
 		{
 		// Royal Flushes are technically straight flushes
-		EXPECT_EQ (true, CEvaluator::IsStraightFlush (data::royal_flush_diamonds));
-		EXPECT_EQ (true, CEvaluator::IsStraightFlush (data::royal_flush_spades));
+		EXPECT_EQ (true, CEvaluator::IsStraightFlush (data::royal_flush_diamonds).bIsStraightFlush);
+		EXPECT_EQ (Ace, CEvaluator::IsStraightFlush (data::royal_flush_diamonds).high_card);
+		EXPECT_EQ (true, CEvaluator::IsStraightFlush (data::royal_flush_spades).bIsStraightFlush);
 		// Straight-up straight flushes
-		EXPECT_EQ (true, CEvaluator::IsStraightFlush (data::straight_flush_two_spades));
-		EXPECT_EQ (true, CEvaluator::IsStraightFlush (data::straight_flush_six_hearts));
-		EXPECT_EQ (true, CEvaluator::IsStraightFlush (data::straight_flush_four_diamonds));
-		EXPECT_EQ (true, CEvaluator::IsStraightFlush (data::straight_flush_nine_clubs));
+		EXPECT_EQ (true, CEvaluator::IsStraightFlush (data::straight_flush_two_spades).bIsStraightFlush);
+		EXPECT_EQ (Six, CEvaluator::IsStraightFlush (data::straight_flush_two_spades).high_card);
+		EXPECT_EQ (true, CEvaluator::IsStraightFlush (data::straight_flush_six_hearts).bIsStraightFlush);
+		EXPECT_EQ (true, CEvaluator::IsStraightFlush (data::straight_flush_four_diamonds).bIsStraightFlush);
+		EXPECT_EQ (true, CEvaluator::IsStraightFlush (data::straight_flush_nine_clubs).bIsStraightFlush);
 
 		// Not straight flushes
-		EXPECT_EQ (false, CEvaluator::IsStraightFlush (data::flush_clubs));
+		EXPECT_EQ (false, CEvaluator::IsStraightFlush (data::flush_clubs).bIsStraightFlush);
 		EXPECT_EQ (false, CEvaluator::IsStraightFlush (data::not_flush));
 		}
 

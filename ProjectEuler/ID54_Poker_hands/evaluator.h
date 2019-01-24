@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <set>
+#include <functional>
 
 #include "card.h"
 
@@ -27,10 +28,12 @@ using namespace card;
 class CEvaluator
 	{
 	public:
+		// At present we don't have handling for a tie with royal flushes
 		static bool IsRoyalFlush (const CHand& hand);
 
 		struct str_flush_t
 			{
+			operator bool () {return bIsStraightFlush;}
 			bool bIsStraightFlush = false;
 			value_t high_card = Two;
 			};
@@ -38,6 +41,7 @@ class CEvaluator
 
 		struct four_oak_t
 			{
+			operator bool () { return bHas4oak; }
 			bool bHas4oak = false;
 			value_t high_card = Two;
 			value_t four_oak_card = Two;
@@ -46,6 +50,7 @@ class CEvaluator
 
 		struct full_house_t
 			{
+			operator bool () { return bIsFullHouse; }
 			bool bIsFullHouse = false;
 			value_t three_value = Two;
 			};
@@ -53,6 +58,7 @@ class CEvaluator
 
 		struct flush_t
 			{
+			operator bool () { return bIsFlush; }
 			bool bIsFlush = false;
 			// Highest value card at the end.
 			std::vector<value_t> sorted_cards;
@@ -61,6 +67,7 @@ class CEvaluator
 
 		struct straight_t
 			{
+			operator bool () { return bIsStraight; }
 			bool bIsStraight = false;
 			value_t high_card = Two;
 			};
@@ -68,7 +75,8 @@ class CEvaluator
 
 		struct three_oak_t
 			{
-			bool bIs3Oak = false;
+			operator bool () { return bHas3Oak; }
+			bool bHas3Oak = false;
 			value_t three_cards_value = Two;
 			// Only the two cards that aren't part of the three of a kind, highest value card at the end.
 			std::vector<value_t> sorted_rem_cards;
@@ -77,7 +85,8 @@ class CEvaluator
 
 		struct two_pair_t
 			{
-			bool bIsTwoPair = false;
+			operator bool () { return bHasTwoPair; }
+			bool bHasTwoPair = false;
 			value_t high_pair = Three;
 			value_t low_pair = Two;
 			value_t high_card = Four;
@@ -86,16 +95,14 @@ class CEvaluator
 
 		struct pair_t
 			{
+			operator bool () { return bHasPair; }
 			bool bHasPair = false;
 			value_t pair_value = Two;
 			// Only the two cards that aren't part of the pair, highest value card at the end.
 			std::vector<value_t> sorted_rem_cards;
 			};
 		static const pair_t HasPair (const CHand& hand);
-
-		// Returns vector of sorted values with the highest value card at the end.
-		const std::vector<value_t> GetSortedValues (const CHand& hand);
-
+		
 		enum player_t
 			{
 			player_1 = 1,
@@ -109,4 +116,6 @@ class CEvaluator
 
 	private:
 		static bool _HasXOfAKind (const CHand& hand, int number);
+		// Returns sorted vector with highest value card at the end. Include predicate which returns true on values it wants included in the final sorted list
+		static const std::vector<value_t> _GetSortedValueSet (const CHand& hand, std::function<bool(value_t)> pred = [](value_t v) { return true; });
 	};
