@@ -236,12 +236,43 @@ namespace
 
 	TEST (CEvaluator, CompareHands)
 		{
+		// ** TEST NOTE **
+		// Tests start down at Royal flush, which compares itself against all other hand types.
+		// Each hand type working up does not compare to the type below it, as those combinations of hand types have already been tested.
+
 		// High Card : Highest value card.
+			// Tested against all other hand types later on.
 		// One Pair : Two cards of the same value.
-		// Two Pairs : Two different pairs.
+		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::pair_9s, data::high_card_ace_ten_seven));
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::high_card_eight_seven_five, data::pair_As));
+		// Two Pairs : Two different pairs.s
+		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::two_pair_2s_5s, data::pair_3s));
+		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::two_pair_2s_5s, data::high_card_ace_ten_seven));
+		// reverses
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::pair_3s, data::two_pair_2s_5s));
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::high_card_ace_ten_seven, data::two_pair_2s_5s));
+
 		// Three of a Kind : Three cards of the same value.
+		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::three_oak_sevens, data::two_pair_2s_5s));
+		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::three_oak_sevens, data::pair_3s));
+		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::three_oak_sevens, data::high_card_ace_ten_seven));
+		// reverses
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::two_pair_2s_5s, data::three_oak_sevens));
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::pair_3s, data::three_oak_sevens));
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::high_card_ace_ten_seven, data::three_oak_sevens));
+
 		// Straight : All cards are consecutive values.
-		// Flush : All cards of the same suit.s
+		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::straight_t, data::three_oak_fives));
+		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::straight_t, data::two_pair_2s_5s));
+		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::straight_t, data::pair_3s));
+		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::straight_t, data::high_card_ace_ten_seven));
+		// reverses
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::three_oak_fives, data::straight_t));
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::two_pair_2s_5s, data::straight_t));
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::pair_3s, data::straight_t));
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::high_card_ace_ten_seven, data::straight_t));
+
+		// Flush : All cards of the same suit.
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::flush_hearts, data::straight_3));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::flush_hearts, data::three_oak_fives));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::flush_hearts, data::two_pair_2s_5s));
