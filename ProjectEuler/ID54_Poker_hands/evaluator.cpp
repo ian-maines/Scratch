@@ -51,7 +51,7 @@ const CEvaluator::str_flush_t CEvaluator::IsStraightFlush (const CHand& hand)
 	{
 	bool bIsStraightFlush (IsStraight (hand).bIsStraight && IsFlush (hand).bIsFlush);
 
-	return { bIsStraightFlush, Two };
+	return { bIsStraightFlush, _GetSortedValueSet(hand).back() };
 	}
 
 bool CEvaluator::IsRoyalFlush (const CHand& hand)
@@ -89,36 +89,23 @@ bool CEvaluator::IsRoyalFlush (const CHand& hand)
 
 const CEvaluator::four_oak_t CEvaluator::Has4OfAKind (const CHand& hand)
 	{
-	return { _HasXOfAKind (hand, 4), Two, Three };
+	auto four_oak = _HasXOfAKind (hand, 4);
+	return { four_oak.bHas, _GetSortedValueSet (hand, [&four_oak](const value_t v) {return (v != four_oak.xoak);}).back(), four_oak.xoak };
 	}
 
 const CEvaluator::full_house_t CEvaluator::IsFullHouse (const CHand& hand)
 	{
-	// We can solve this in a similar manner to _HasXOfAKind
-	std::map<value_t, int> values;
+	auto ThreeOAK = Has3OfAKind(hand);
+	auto Pair = HasPair(hand);
 
-	const CHand::hand_t& h = hand.get ();
-	std::for_each (h.begin (), h.end (), [&values](const CCard& c)
-		{
-		if (values.find (c.GetValue ()) == values.end ())
-			{
-			values.insert (std::make_pair (c.GetValue (), 1));
-			}
-		else
-			{
-			values[c.GetValue ()]++;
-			}
-		});
 
-	bool b3OAK = std::any_of (values.begin (), values.end (), [](const std::pair<value_t, int>& val) {return val.second == 3; });
-	bool bPair = std::any_of (values.begin (), values.end (), [](const std::pair<value_t, int>& val) {return val.second == 2; });
-
-	return { b3OAK && bPair, Two };
+	return { ThreeOAK.bHas3Oak && Pair.bHasPair, ThreeOAK.three_cards_value };
 	}
 
 const CEvaluator::three_oak_t CEvaluator::Has3OfAKind (const CHand& hand)
 	{
-	return { _HasXOfAKind (hand, 3), Two, std::vector<value_t> () };
+	auto ThreeOak = _HasXOfAKind (hand, 3);
+	return { ThreeOak.bHas, ThreeOak.xoak, _GetSortedValueSet (hand, [&ThreeOak] (value_t v) { return v != ThreeOak.xoak; }) };
 	}
 
 const CEvaluator::two_pair_t CEvaluator::HasTwoPair (const CHand& hand)
@@ -139,16 +126,25 @@ const CEvaluator::two_pair_t CEvaluator::HasTwoPair (const CHand& hand)
 			}
 		});
 
-	size_t pair_count = 0;
+	std::vector<value_t> pairs;
+	std::for_each (values.begin (), values.end (), [&pairs](const std::pair<value_t, int>& val) {if (val.second == 2) { pairs.push_back(val.first); } });
 
-	std::for_each (values.begin (), values.end (), [&pair_count](const std::pair<value_t, int>& val) {if (val.second == 2) { pair_count++; } });
-
-	return { pair_count == 2, Three, Two, Four };
+	if (pairs.size () == 2)
+		{
+		value_t high_card = _GetSortedValueSet (hand, [&pairs] (value_t v) {return (v != pairs[0] && v != pairs[1]);}).back();
+		if (pairs[0] > pairs[1])
+			{
+			return { pairs.size () == 2, pairs[0], pairs[1], high_card };
+			}
+		return
+		}
+	return { pairs.size () == 2, pairs[1], pairs[0], high_card };
 	}
 
 const CEvaluator::pair_t CEvaluator::HasPair (const CHand& hand)
 	{
-	return { _HasXOfAKind (hand, 2), Two, std::vector<value_t> () };
+	auto two_oak = _HasXOfAKind (hand, 2);
+	return { two_oak.bHas, two_oak.xoak, std::vector<value_t> () };
 	}
 
 CEvaluator::player_t CEvaluator::CompareHands (const CHand& player1, const CHand& player2)
@@ -272,9 +268,11 @@ CEvaluator::player_t CEvaluator::CompareHands (const CHand& player1, const CHand
 		}
 
 	// High Card : Highest value card.
+	// FIXME
+	return player_1;
 	}
 
-bool CEvaluator::_HasXOfAKind (const CHand& hand, int number)
+const CEvaluator::has_xoak CEvaluator::_HasXOfAKind (const CHand& hand, int number)
 	{
 	std::map<value_t, int> values;
 
@@ -290,8 +288,11 @@ bool CEvaluator::_HasXOfAKind (const CHand& hand, int number)
 			values[c.GetValue ()]++;
 			}
 		});
+	
+	value_t last_match;
+	std::for_each (values.begin (), values.end (), [&number, &last_match](const std::pair<value_t, int>& p) {if (p.second == number) { last_match = p.first; }; });
 
-	return std::any_of (values.begin (), values.end (), [&number](const std::pair<value_t, int>& val) {return val.second >= number; });
+	return has_xoak{ std::any_of (values.begin (), values.end (), [&number](const std::pair<value_t, int>& val) {return val.second == number; }), last_match};
 	}
 
 
@@ -302,8 +303,11 @@ CEvaluator::player_t CEvaluator::PlayerWithHighCard (std::vector<value_t> player
 		throw std::exception ("Unexpected hand size");
 		}
 
-	auto p1_sorted = _GetSortedValueSet (player1);
-	auto p2_sorted = _GetSortedValueSet (player2);
+	//auto p1_sorted = _GetSortedValueSet (player1);
+	//auto p2_sorted = _GetSortedValueSet (player2);
+
+	// FIXME
+	return player_1;
 	}
 
 const std::vector<value_t> CEvaluator::_GetSortedValueSet (const CHand& hand, std::function<bool (value_t)> pred/* = []() { return false; }*/)

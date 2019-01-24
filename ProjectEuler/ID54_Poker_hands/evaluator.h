@@ -115,7 +115,12 @@ class CEvaluator
 		static player_t PlayerWithHighCard (std::vector<value_t> player1, std::vector<value_t> player2);
 
 	private:
-		static bool _HasXOfAKind (const CHand& hand, int number);
+		struct has_xoak
+			{
+			bool bHas = false;
+			value_t xoak = Two;
+			};
+		static const has_xoak _HasXOfAKind (const CHand& hand, int number);
 		// Returns sorted vector with highest value card at the end. Include predicate which returns true on values it wants included in the final sorted list
 		static const std::vector<value_t> _GetSortedValueSet (const CHand& hand, std::function<bool(value_t)> pred = [](value_t v) { return true; });
 	};

@@ -6,6 +6,15 @@
     <OutDir>$(SolutionDir)\_buildoutput\$(ProjectName)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)\_intermediate\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
-  <ItemDefinitionGroup />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <TreatWarningAsError>true</TreatWarningAsError>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemGroup />
 </Project>
