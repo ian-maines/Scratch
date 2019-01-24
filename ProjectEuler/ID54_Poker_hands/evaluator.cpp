@@ -149,7 +149,7 @@ bool CEvaluator::HasPair (const CHand& hand)
 	return _HasXOfAKind (hand, 2);
 	}
 
-int CEvaluator::CompareHands (const CHand& player1, const CHand& player2)
+CEvaluator::player_t CEvaluator::CompareHands (const CHand& player1, const CHand& player2)
 	{
 	// FIXME: Is there a better way than brute forcing?
 	//Royal flush
@@ -160,8 +160,8 @@ int CEvaluator::CompareHands (const CHand& player1, const CHand& player2)
 			{
 			throw std::exception ("Unclear rules for two royal flushes");
 			}
-		if (p1rf) { return 1; }
-		if (p2rf) { return 2; }
+		if (p1rf) { return player_1; }
+		if (p2rf) { return player_2; }
 		}
 		
 	// Straight flush
@@ -172,8 +172,8 @@ int CEvaluator::CompareHands (const CHand& player1, const CHand& player2)
 			{
 			throw std::exception ("Unclear rules for two straight flushes");
 			}
-		if (p1sf) { return 1; }
-		if (p1sf) { return 2; }
+		if (p1sf) { return player_1; }
+		if (p2sf) { return player_2; }
 		}
 
 	// Four of a kind (high card wins tie, high set of 4 wins tie of that)
@@ -185,9 +185,91 @@ int CEvaluator::CompareHands (const CHand& player1, const CHand& player2)
 			// FIXME!
 			throw std::exception ("Not implemented");
 			}
-		if (p14oak) { return 1; }
-		if (p24oak) { return 2; }
+		if (p14oak) { return player_1; }
+		if (p24oak) { return player_2; }
 		}
+
+	// Full House : Three of a kind and a pair. (high three of a kind wins tie)
+		{
+		const bool p1fh = IsFullHouse (player1);
+		const bool p2fh = IsFullHouse (player2);
+		if (p1fh && p2fh)
+			{
+			throw std::exception ("Not implemented");
+			}
+		if (p1fh) { return player_1; }
+		if (p2fh) { return player_2; }		
+		}
+
+	// Flush : All cards of the same suit.
+		{
+		const bool p1flush = IsFlush (player1);
+		const bool p2flush = IsFlush (player2);
+		if (p1flush && p2flush)
+			{
+			throw std::exception("not implemented");
+			}
+		if (p1flush) { return player_1; }
+		if (p2flush) { return player_2; }
+		}
+		
+	// Straight : All cards are consecutive values.
+		{
+		const bool p1straight = IsStraight (player1);
+		const bool p2straight = IsStraight (player2);
+		
+		if (p1straight && p2straight)
+			{
+			throw std::exception ("Not implemented");
+			}
+		
+		if (p1straight) { return player_1; }
+		if (p2straight) { return player_2; }
+		}
+
+	// Three of a Kind : Three cards of the same value.
+		{
+		const bool p13oak = Has3OfAKind (player1);
+		const bool p23oak = Has3OfAKind (player2);
+
+		if (p13oak && p23oak)
+			{
+			throw std::exception ("Not implemented");
+			}
+
+		if (p13oak) { return player_1; }
+		if (p23oak) { return player_2; }
+		}
+
+	// Two Pairs : Two different pairs.
+		{
+		const bool p12pair = HasTwoPair (player1);
+		const bool p22pair = HasTwoPair (player2);
+
+		if (p12pair && p22pair)
+			{
+			throw std::exception("Not implemented");
+			}
+
+		if (p12pair) { return player_1; }
+		if (p22pair) { return player_2; }
+		}
+
+	// One Pair : Two cards of the same value.
+		{
+		const bool p1pair = HasPair (player1);
+		const bool p2pair = HasPair (player2);
+
+		if (p1pair && p2pair)
+			{
+			throw std::exception ("Not implemented");
+			}
+
+		if (p1pair) { return player_1; }
+		if (p2pair) { return player_2; }
+		}
+
+	// High Card : Highest value card.
 	}
 
 bool CEvaluator::_HasXOfAKind (const CHand& hand, int number)
