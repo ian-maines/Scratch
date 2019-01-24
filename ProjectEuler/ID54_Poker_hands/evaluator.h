@@ -105,14 +105,11 @@ class CEvaluator
 		
 		enum player_t
 			{
+			tie = -1,
 			player_1 = 1,
-			player_2,
+			player_2 = 2,
 			};
 		static player_t CompareHands (const CHand& player1, const CHand& player2);
-		
-		// Expects vector size to be equal. Throws exception if not.
-		// Return designates which player has high card. Exception thrown on tie.
-		static player_t PlayerWithHighCard (std::vector<value_t> player1, std::vector<value_t> player2);
 
 	private:
 		struct has_xoak
@@ -123,4 +120,7 @@ class CEvaluator
 		static const has_xoak _HasXOfAKind (const CHand& hand, int number);
 		// Returns sorted vector with highest value card at the end. Include predicate which returns true on values it wants included in the final sorted list
 		static const std::vector<value_t> _GetSortedValueSet (const CHand& hand, std::function<bool(value_t)> pred = [](value_t v) { return true; });
+
+		static player_t _winner (value_t player1, value_t player2);
+		static player_t _winner (std::vector<value_t> player1, std::vector<value_t> player2);
 	};

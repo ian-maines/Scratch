@@ -55,6 +55,20 @@ static bool op_lt(const value_t& rhs, const value_t lhs)	// FIXME NAME
 	return i_rhs < i_lhs;
 	};
 
+static bool lt (value_t lhs, value_t rhs)
+	{
+	static const std::vector<char> value_order = { Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace };
+	// Return true if we're less than rhs.
+	std::vector<char>::const_iterator i_lhs = value_order.begin ();	// Us
+	std::vector<char>::const_iterator i_rhs = value_order.begin ();
+
+	// Can't use std::find because list isn't value-sorted and won't yield the result we want.
+	while (i_lhs != value_order.end ()) { if (*i_lhs == lhs) { break; } ++i_lhs; }
+	while (i_rhs != value_order.end ()) { if (*i_rhs == rhs) { break; } ++i_rhs; }
+
+	return i_lhs < i_rhs;
+	}
+
 class CCard
 	{
 	public:
@@ -79,16 +93,7 @@ class CCard
 		//				   Use those containers with card_absolute_compare_t
 		bool operator< (const CCard& rhs) const
 			{
-			static const std::vector<char> value_order = { Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace };
-			// Return true if we're less than rhs.
-			std::vector<char>::const_iterator i_lhs = value_order.begin ();	// Us
-			std::vector<char>::const_iterator i_rhs = value_order.begin ();
-
-			// Can't use std::find because list isn't value-sorted and won't yield the result we want.
-			while (i_lhs != value_order.end ()) { if (*i_lhs == GetValue ()) { break; } ++i_lhs; }
-			while (i_rhs != value_order.end ()) { if (*i_rhs == rhs.GetValue ()) { break; } ++i_rhs; }
-
-			return i_lhs < i_rhs;
+			return lt (GetValue(), rhs.GetValue ());
 			}
 
 		// For consistency since we have operator<

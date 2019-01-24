@@ -136,15 +136,15 @@ const CEvaluator::two_pair_t CEvaluator::HasTwoPair (const CHand& hand)
 			{
 			return { pairs.size () == 2, pairs[0], pairs[1], high_card };
 			}
-		return
+		return { pairs.size () == 2, pairs[1], pairs[0], high_card };
 		}
-	return { pairs.size () == 2, pairs[1], pairs[0], high_card };
+	return { pairs.size () == 2, Three, Two, Four };
 	}
 
 const CEvaluator::pair_t CEvaluator::HasPair (const CHand& hand)
 	{
 	auto two_oak = _HasXOfAKind (hand, 2);
-	return { two_oak.bHas, two_oak.xoak, std::vector<value_t> () };
+	return { two_oak.bHas, two_oak.xoak, _GetSortedValueSet (hand, [&two_oak](value_t v) { return v != two_oak.xoak; }) };
 	}
 
 CEvaluator::player_t CEvaluator::CompareHands (const CHand& player1, const CHand& player2)
@@ -168,7 +168,12 @@ CEvaluator::player_t CEvaluator::CompareHands (const CHand& player1, const CHand
 		const auto p2sf = IsStraightFlush (player2);
 		if (p1sf.bIsStraightFlush && p2sf.bIsStraightFlush)
 			{
-			throw std::exception ("Unclear rules for two straight flushes");
+			player_t w = _winner(p1sf.high_card, p2sf.high_card);
+			if (w == tie)
+				{
+				throw std::exception("Overall tie");
+				}
+			return w;
 			}
 		if (p1sf.bIsStraightFlush) { return player_1; }
 		if (p2sf.bIsStraightFlush) { return player_2; }
@@ -180,8 +185,16 @@ CEvaluator::player_t CEvaluator::CompareHands (const CHand& player1, const CHand
 		const auto p24oak = Has4OfAKind (player2);
 		if (p14oak.bHas4oak && p24oak.bHas4oak)
 			{
-			// FIXME!
-			throw std::exception ("Not implemented");
+			player_t w = _winner (p14oak.four_oak_card, p24oak.four_oak_card);
+			if (w == tie)
+				{
+				w = _winner (p14oak.high_card, p24oak.high_card);
+				if (w == tie)
+					{
+					throw std::exception ("Overall tie");
+					}
+				}
+			return w;
 			}
 		if (p14oak.bHas4oak) { return player_1; }
 		if (p24oak.bHas4oak) { return player_2; }
@@ -193,7 +206,7 @@ CEvaluator::player_t CEvaluator::CompareHands (const CHand& player1, const CHand
 		const auto p2fh = IsFullHouse (player2);
 		if (p1fh.bIsFullHouse && p2fh.bIsFullHouse)
 			{
-			throw std::exception ("Not implemented");
+			return _winner(p1fh.three_value, p2fh.three_value);
 			}
 		if (p1fh.bIsFullHouse) { return player_1; }
 		if (p2fh.bIsFullHouse) { return player_2; }		
@@ -205,7 +218,12 @@ CEvaluator::player_t CEvaluator::CompareHands (const CHand& player1, const CHand
 		const auto p2flush = IsFlush (player2);
 		if (p1flush.bIsFlush && p2flush.bIsFlush)
 			{
-			throw std::exception("not implemented");
+			player_t w = _winner (p1flush.sorted_cards, p2flush.sorted_cards);
+			if (w == tie)
+				{
+				throw std::exception ("Overall tie");
+				}
+			return w;
 			}
 		if (p1flush.bIsFlush) { return player_1; }
 		if (p2flush.bIsFlush) { return player_2; }
@@ -218,7 +236,14 @@ CEvaluator::player_t CEvaluator::CompareHands (const CHand& player1, const CHand
 		
 		if (p1straight.bIsStraight && p2straight.bIsStraight)
 			{
-			throw std::exception ("Not implemented");
+			player_t w = _winner(p1straight.high_card, p2straight.high_card);
+
+			if (w == tie)
+				{
+				throw std::exception ("Overall tie");
+				}
+
+			return w;
 			}
 		
 		if (p1straight.bIsStraight) { return player_1; }
@@ -232,7 +257,15 @@ CEvaluator::player_t CEvaluator::CompareHands (const CHand& player1, const CHand
 
 		if (p13oak.bHas3Oak && p23oak.bHas3Oak)
 			{
-			throw std::exception ("Not implemented");
+			player_t w = _winner (p13oak.three_cards_value, p23oak.three_cards_value);
+			if (w == tie)
+				{
+				w = _winner (p13oak.sorted_rem_cards, p23oak.sorted_rem_cards);
+				if (w == tie)
+					{
+					throw std::exception ("Overall tie");
+					}
+				}
 			}
 
 		if (p13oak.bHas3Oak) { return player_1; }
@@ -246,7 +279,20 @@ CEvaluator::player_t CEvaluator::CompareHands (const CHand& player1, const CHand
 
 		if (p12pair.bHasTwoPair && p22pair.bHasTwoPair)
 			{
-			throw std::exception("Not implemented");
+			player_t w = _winner (p12pair.high_pair, p22pair.high_pair); 
+			if (w == tie)
+				{
+				w = _winner (p12pair.low_pair, p22pair.low_pair);
+				if (w == tie)
+					{
+					w = _winner (p12pair.high_card, p22pair.high_card);
+					if (w == tie)
+						{
+						throw std::exception ("Overall tie");
+						}
+					}
+				}
+			return w;
 			}
 
 		if (p12pair.bHasTwoPair) { return player_1; }
@@ -260,7 +306,16 @@ CEvaluator::player_t CEvaluator::CompareHands (const CHand& player1, const CHand
 
 		if (p1pair.bHasPair && p2pair.bHasPair)
 			{
-			throw std::exception ("Not implemented");
+			player_t w = _winner (p1pair.pair_value, p2pair.pair_value);
+			if (w = tie)
+				{
+				w = _winner (p1pair.sorted_rem_cards, p2pair.sorted_rem_cards);
+				if (w == tie)
+					{
+					throw std::exception ("Overall tie");
+					}
+				}
+			return w;
 			}
 
 		if (p1pair.bHasPair) { return player_1; }
@@ -268,8 +323,12 @@ CEvaluator::player_t CEvaluator::CompareHands (const CHand& player1, const CHand
 		}
 
 	// High Card : Highest value card.
-	// FIXME
-	return player_1;
+	player_t w = _winner (_GetSortedValueSet(player1), _GetSortedValueSet(player2));
+	if (w == tie)
+		{
+		throw std::exception ("Overall Tie");
+		}
+	return w;
 	}
 
 const CEvaluator::has_xoak CEvaluator::_HasXOfAKind (const CHand& hand, int number)
@@ -295,21 +354,6 @@ const CEvaluator::has_xoak CEvaluator::_HasXOfAKind (const CHand& hand, int numb
 	return has_xoak{ std::any_of (values.begin (), values.end (), [&number](const std::pair<value_t, int>& val) {return val.second == number; }), last_match};
 	}
 
-
-CEvaluator::player_t CEvaluator::PlayerWithHighCard (std::vector<value_t> player1, std::vector<value_t> player2)
-	{
-	if (player1.size () == 0 || player2.size () == 0 || player1.size () != player2.size ())
-		{
-		throw std::exception ("Unexpected hand size");
-		}
-
-	//auto p1_sorted = _GetSortedValueSet (player1);
-	//auto p2_sorted = _GetSortedValueSet (player2);
-
-	// FIXME
-	return player_1;
-	}
-
 const std::vector<value_t> CEvaluator::_GetSortedValueSet (const CHand& hand, std::function<bool (value_t)> pred/* = []() { return false; }*/)
 	{
 	CHand::hand_t copy (hand.get());
@@ -322,4 +366,37 @@ const std::vector<value_t> CEvaluator::_GetSortedValueSet (const CHand& hand, st
 	std::vector<value_t> rv;
 	std::for_each (copy.begin (), copy.end (), [&rv, &pred](const CCard& c) { if (pred (c.GetValue ())) { rv.push_back (c.GetValue ()); }});
 	return rv;
+	}
+
+CEvaluator::player_t CEvaluator::_winner (value_t player1, value_t player2)
+	{
+	if (lt (player2, player1))
+		{
+		return player_1;
+		}
+	else if (lt (player1, player2))
+		{
+		return player_2;
+		}
+	return tie;
+	}
+
+
+CEvaluator::player_t CEvaluator::_winner (std::vector<value_t> player1, std::vector<value_t> player2)
+	{
+	if (player1.size () == 0 || player2.size () == 0 || player1.size () != player2.size ())
+		{
+		throw std::exception ("Unexected size");
+		}
+
+	player_t w = tie;
+	for (int i = player1.size () - 1; i >= 0; --i)
+		{
+		w = _winner (player1[i], player2[i]);
+		if (w != tie)
+			{
+			break;
+			}
+		}
+	return w;
 	}
