@@ -2,6 +2,7 @@
 #pragma once
 
 #include "card.h"
+#include "evaluator.h"
 
 class CMatch
 	{
@@ -14,8 +15,20 @@ class CMatch
 		std::string print () const
 			{
 			std::stringstream ss;
-			ss << m_p1.print () << " " << m_p2.print ();
+			ss << m_p1.print () << " | " << m_p2.print ();
 			return ss.str ();
+			}
+
+		std::string print_result () const
+			{
+			std::stringstream ss;
+			ss << print () << " Winner = " << CEvaluator::print(winner());
+			return ss.str();
+			}
+
+		CEvaluator::player_t winner () const
+			{
+			return CEvaluator::CompareHands (m_p1, m_p2);
 			}
 
 	private:

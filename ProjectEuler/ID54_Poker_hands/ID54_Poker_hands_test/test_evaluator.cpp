@@ -8,6 +8,10 @@ using namespace card;
 
 namespace data
 	{
+	/*
+	const CHand names (CHand::hand_t{ CCard (value_t::, suit_t::), CCard (value_t::, suit_t::), CCard (value_t::, suit_t::),
+							 CCard (value_t::, suit_t::), CCard (value_t::Nne, suit_t::) });
+	*/
 	// Hands for flush testing
 	const CHand flush_clubs (CHand::hand_t { CCard (value_t::Ace, suit_t::Clubs), CCard (value_t::Three, suit_t::Clubs), CCard (value_t::Five, suit_t::Clubs),
 							 CCard (value_t::Seven, suit_t::Clubs), CCard (value_t::Nine, suit_t::Clubs) });
@@ -40,8 +44,10 @@ namespace data
 							 CCard (value_t::King, suit_t::Hearts), CCard (value_t::Jack, suit_t::Clubs) });
 	const CHand four_oak_twos (CHand::hand_t{ CCard (value_t::Two, suit_t::Clubs), CCard (value_t::Two, suit_t::Diamonds), CCard (value_t::Two, suit_t::Spades),
 							 CCard (value_t::Two, suit_t::Hearts), CCard (value_t::Ace, suit_t::Clubs) });
-	const CHand four_oak_nines (CHand::hand_t{ CCard (value_t::Nine, suit_t::Clubs), CCard (value_t::Nine, suit_t::Diamonds), CCard (value_t::Nine, suit_t::Spades),
+	const CHand four_oak_nines_7 (CHand::hand_t{ CCard (value_t::Nine, suit_t::Clubs), CCard (value_t::Nine, suit_t::Diamonds), CCard (value_t::Nine, suit_t::Spades),
 							 CCard (value_t::Nine, suit_t::Hearts), CCard (value_t::Seven, suit_t::Clubs) });
+	const CHand four_oak_nines_6 (CHand::hand_t{ CCard (value_t::Nine, suit_t::Clubs), CCard (value_t::Nine, suit_t::Diamonds), CCard (value_t::Nine, suit_t::Spades),
+						 CCard (value_t::Nine, suit_t::Hearts), CCard (value_t::Six, suit_t::Clubs) });
 
 	// Full houses
 	const CHand full_house_ka (CHand::hand_t{ CCard (value_t::King, suit_t::Clubs), CCard (value_t::King, suit_t::Diamonds), CCard (value_t::Ace, suit_t::Spades),
@@ -78,8 +84,14 @@ namespace data
 							 CCard (value_t::Two, suit_t::Diamonds), CCard (value_t::Six, suit_t::Spades) });
 	const CHand pair_As (CHand::hand_t{ CCard (value_t::Ace, suit_t::Spades), CCard (value_t::Jack, suit_t::Spades), CCard (value_t::Ace, suit_t::Hearts),
 							CCard (value_t::Two, suit_t::Diamonds), CCard (value_t::Three, suit_t::Spades) });
-	const CHand pair_3s (CHand::hand_t{ CCard (value_t::Queen, suit_t::Spades), CCard (value_t::Five, suit_t::Spades), CCard (value_t::Three, suit_t::Hearts),
+	const CHand pair_3s_965 (CHand::hand_t{ CCard (value_t::Nine, suit_t::Spades), CCard (value_t::Five, suit_t::Spades), CCard (value_t::Three, suit_t::Hearts),
+							 CCard (value_t::Six, suit_t::Diamonds), CCard (value_t::Three, suit_t::Spades) });
+	const CHand pair_3s_975 (CHand::hand_t{ CCard (value_t::Nine, suit_t::Spades), CCard (value_t::Five, suit_t::Spades), CCard (value_t::Three, suit_t::Hearts),
 							 CCard (value_t::Seven, suit_t::Diamonds), CCard (value_t::Three, suit_t::Spades) });
+	const CHand pair_9s_K75 (CHand::hand_t{ CCard (value_t::Five, suit_t::Hearts), CCard (value_t::King, suit_t::Spades), CCard (value_t::Nine, suit_t::Clubs),
+							 CCard (value_t::Seven, suit_t::Diamonds), CCard (value_t::Nine, suit_t::Hearts) });
+	const CHand pair_5s_A83 (CHand::hand_t{ CCard (value_t::Eight, suit_t::Diamonds), CCard (value_t::Three, suit_t::Spades), CCard (value_t::Five, suit_t::Diamonds),
+							 CCard (value_t::Five, suit_t::Clubs), CCard (value_t::Ace, suit_t::Hearts) });
 	// Straight
 	const CHand straight_3 (CHand::hand_t{ CCard (value_t::Five, suit_t::Spades), CCard (value_t::Three, suit_t::Diamonds), CCard (value_t::Six, suit_t::Hearts),
 							 CCard (value_t::Four, suit_t::Diamonds), CCard (value_t::Seven, suit_t::Spades) });
@@ -146,7 +158,7 @@ namespace
 		EXPECT_EQ (King, CEvaluator::Has4OfAKind (data::four_oak_kings).four_oak_card);
 		EXPECT_EQ (Jack, CEvaluator::Has4OfAKind (data::four_oak_kings).high_card);
 		EXPECT_EQ (true, CEvaluator::Has4OfAKind (data::four_oak_twos).bHas4oak);
-		EXPECT_EQ (true, CEvaluator::Has4OfAKind (data::four_oak_nines).bHas4oak);
+		EXPECT_EQ (true, CEvaluator::Has4OfAKind (data::four_oak_nines_7).bHas4oak);
 
 		EXPECT_EQ (false, CEvaluator::Has4OfAKind (data::royal_flush_diamonds).bHas4oak);
 		EXPECT_EQ (false, CEvaluator::Has4OfAKind (data::straight_flush_four_diamonds).bHas4oak);
@@ -174,9 +186,9 @@ namespace
 	TEST (CEvaluator, HasPair)
 		{
 		// pair
-		EXPECT_EQ (true, CEvaluator::HasPair (data::pair_3s).bHasPair);
-		EXPECT_EQ (Three, CEvaluator::HasPair (data::pair_3s).pair_value);
-		EXPECT_EQ (Queen, CEvaluator::HasPair (data::pair_3s).sorted_rem_cards.back());
+		EXPECT_EQ (true, CEvaluator::HasPair (data::pair_3s_975).bHasPair);
+		EXPECT_EQ (Three, CEvaluator::HasPair (data::pair_3s_975).pair_value);
+		EXPECT_EQ (Nine, CEvaluator::HasPair (data::pair_3s_975).sorted_rem_cards.back());
 		EXPECT_EQ (true, CEvaluator::HasPair (data::pair_9s).bHasPair);
 		EXPECT_EQ (true, CEvaluator::HasPair (data::pair_As).bHasPair);
 
@@ -204,8 +216,8 @@ namespace
 		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::straight_flush_six_hearts).bHasTwoPair);
 		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::four_oak_kings).bHasTwoPair);
 		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::four_oak_twos).bHasTwoPair);
-		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::four_oak_nines).bHasTwoPair);
-		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::pair_3s).bHasTwoPair);
+		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::four_oak_nines_7).bHasTwoPair);
+		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::pair_3s_975).bHasTwoPair);
 		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::pair_9s).bHasTwoPair);
 		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::pair_As).bHasTwoPair);
 		EXPECT_EQ (false, CEvaluator::HasTwoPair (data::three_oak_fives).bHasTwoPair);
@@ -230,8 +242,8 @@ namespace
 		EXPECT_EQ (false, CEvaluator::IsStraight (data::flush_hearts).bIsStraight);
 		EXPECT_EQ (false, CEvaluator::IsStraight (data::four_oak_kings).bIsStraight);
 		EXPECT_EQ (false, CEvaluator::IsStraight (data::four_oak_twos).bIsStraight);
-		EXPECT_EQ (false, CEvaluator::IsStraight (data::four_oak_nines).bIsStraight);
-		EXPECT_EQ (false, CEvaluator::IsStraight (data::pair_3s).bIsStraight);
+		EXPECT_EQ (false, CEvaluator::IsStraight (data::four_oak_nines_7).bIsStraight);
+		EXPECT_EQ (false, CEvaluator::IsStraight (data::pair_3s_975).bIsStraight);
 		EXPECT_EQ (false, CEvaluator::IsStraight (data::pair_9s).bIsStraight);
 		EXPECT_EQ (false, CEvaluator::IsStraight (data::pair_As).bIsStraight);
 		EXPECT_EQ (false, CEvaluator::IsStraight (data::three_oak_fives).bIsStraight);
@@ -251,29 +263,34 @@ namespace
 			// Tested against all other hand types later on.
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::high_card_ace_ten_seven_five_four, data::high_card_ace_ten_seven_five_three));
 		// One Pair : Two cards of the same value.
-
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::pair_9s, data::high_card_ace_ten_seven));
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::high_card_eight_seven_five, data::pair_As));
+		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::pair_3s_975, data::pair_3s_965));
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::pair_3s_965, data::pair_3s_975));
+		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::pair_9s_K75, data::pair_5s_A83));
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::pair_5s_A83, data::pair_9s_K75));
+
 		// Two Pairs : Two different pairs.s
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::two_pair_2s_5s_6, data::two_pair_2s_5s_8));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::two_pair_3s_5s_8, data::two_pair_2s_5s_8));
 
-		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::two_pair_2s_5s_6, data::pair_3s));
+		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::two_pair_2s_5s_6, data::pair_3s_975));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::two_pair_2s_5s_6, data::high_card_ace_ten_seven));
 		// reverses
-		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::pair_3s, data::two_pair_2s_5s_6));
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::pair_3s_975, data::two_pair_2s_5s_6));
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::high_card_ace_ten_seven, data::two_pair_2s_5s_6));
 
 		// Three of a Kind : Three cards of the same value.
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::three_oak_sevens_A2, data::three_oak_sevens_J6));
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::three_oak_sevens_J6, data::three_oak_sevens_A2));
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::three_oak_sevens_J6, data::three_oak_sevens));
 
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::three_oak_sevens, data::two_pair_2s_5s_6));
-		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::three_oak_sevens, data::pair_3s));
+		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::three_oak_sevens, data::pair_3s_975));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::three_oak_sevens, data::high_card_ace_ten_seven));
 		// reverses
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::two_pair_2s_5s_6, data::three_oak_sevens));
-		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::pair_3s, data::three_oak_sevens));
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::pair_3s_975, data::three_oak_sevens));
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::high_card_ace_ten_seven, data::three_oak_sevens));
 
 		// Straight : All cards are consecutive values.
@@ -282,12 +299,12 @@ namespace
 
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::straight_t, data::three_oak_fives));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::straight_t, data::two_pair_2s_5s_6));
-		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::straight_t, data::pair_3s));
+		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::straight_t, data::pair_3s_975));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::straight_t, data::high_card_ace_ten_seven));
 		// reverses
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::three_oak_fives, data::straight_t));
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::two_pair_2s_5s_6, data::straight_t));
-		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::pair_3s, data::straight_t));
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::pair_3s_975, data::straight_t));
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::high_card_ace_ten_seven, data::straight_t));
 
 		// Flush : All cards of the same suit.
@@ -297,13 +314,13 @@ namespace
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::flush_hearts, data::straight_3));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::flush_hearts, data::three_oak_fives));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::flush_hearts, data::two_pair_2s_5s_6));
-		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::flush_hearts, data::pair_3s));
+		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::flush_hearts, data::pair_3s_975));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::flush_hearts, data::high_card_ace_ten_seven));
 		// reverse
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::straight_3, data::full_house_ka));
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::three_oak_fives, data::full_house_ka));
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::two_pair_2s_5s_6, data::full_house_ka));
-		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::pair_3s, data::full_house_ka));
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::pair_3s_975, data::full_house_ka));
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::high_card_ace_ten_seven, data::full_house_ka));
 
 
@@ -315,26 +332,28 @@ namespace
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::full_house_ka, data::straight_3));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::full_house_ka, data::three_oak_fives));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::full_house_ka, data::two_pair_2s_5s_6));
-		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::full_house_ka, data::pair_3s));
+		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::full_house_ka, data::pair_3s_975));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::full_house_ka, data::high_card_ace_ten_seven));
 		// reverse
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::flush_clubs, data::full_house_ka));
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::straight_3, data::full_house_ka));
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::three_oak_fives, data::full_house_ka));
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::two_pair_2s_5s_6, data::full_house_ka));
-		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::pair_3s, data::full_house_ka));
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::pair_3s_975, data::full_house_ka));
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::high_card_ace_ten_seven, data::full_house_ka));
 
 		// Four of a Kind : Four cards of the same value.
-		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::four_oak_twos, data::four_oak_nines));
-		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::four_oak_nines, data::four_oak_kings));
+		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::four_oak_nines_7, data::four_oak_twos));
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::four_oak_nines_7, data::four_oak_kings));
+		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::four_oak_nines_7, data::four_oak_nines_6));
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::four_oak_nines_6, data::four_oak_nines_7));
 
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::four_oak_twos, data::full_house_23));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::four_oak_twos, data::flush_clubs));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::four_oak_twos, data::straight_3));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::four_oak_twos, data::three_oak_fives));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::four_oak_twos, data::two_pair_2s_5s_6));
-		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::four_oak_twos, data::pair_3s));
+		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::four_oak_twos, data::pair_3s_975));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::four_oak_twos, data::high_card_ace_ten_seven));
 		// reverse
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::full_house_23, data::four_oak_twos));
@@ -342,7 +361,7 @@ namespace
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::straight_3, data::four_oak_twos));
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::three_oak_fives, data::four_oak_twos));
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::two_pair_2s_5s_6, data::four_oak_twos));
-		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::pair_3s, data::four_oak_twos));
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::pair_3s_975, data::four_oak_twos));
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::high_card_ace_ten_seven, data::four_oak_twos));
 
 		// Straight Flush : All cards are consecutive values of same suit.
@@ -355,7 +374,7 @@ namespace
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::straight_flush_two_spades, data::straight_3));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::straight_flush_two_spades, data::three_oak_fives));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::straight_flush_two_spades, data::two_pair_2s_5s_6));
-		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::straight_flush_two_spades, data::pair_3s));
+		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::straight_flush_two_spades, data::pair_3s_975));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::straight_flush_two_spades, data::high_card_ace_ten_seven));
 		// reverse
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::four_oak_kings, data::straight_flush_six_hearts));
@@ -364,7 +383,7 @@ namespace
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::straight_3, data::straight_flush_six_hearts));
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::three_oak_fives, data::straight_flush_six_hearts));
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::two_pair_2s_5s_6, data::straight_flush_six_hearts));
-		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::pair_3s, data::straight_flush_six_hearts));
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::pair_3s_975, data::straight_flush_six_hearts));
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::high_card_ace_ten_seven, data::straight_flush_six_hearts));
 
 
@@ -377,7 +396,7 @@ namespace
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::royal_flush_diamonds, data::straight_3));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::royal_flush_diamonds, data::three_oak_fives));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::royal_flush_diamonds, data::two_pair_2s_5s_6));
-		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::royal_flush_diamonds, data::pair_3s));
+		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::royal_flush_diamonds, data::pair_3s_975));
 		EXPECT_EQ (CEvaluator::player_1, CEvaluator::CompareHands (data::royal_flush_diamonds, data::high_card_ace_ten_seven));
 		// reverse
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::straight_flush_four_diamonds, data::royal_flush_diamonds));
@@ -387,7 +406,7 @@ namespace
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::straight_3, data::royal_flush_diamonds));
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::three_oak_fives, data::royal_flush_diamonds));
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::two_pair_2s_5s_6, data::royal_flush_diamonds));
-		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::pair_3s, data::royal_flush_diamonds));
+		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::pair_3s_975, data::royal_flush_diamonds));
 		EXPECT_EQ (CEvaluator::player_2, CEvaluator::CompareHands (data::high_card_ace_ten_seven, data::royal_flush_diamonds));
 		}
 	}

@@ -8,6 +8,7 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
+#include <map>
 
 #include "card.h"
 #include "evaluator.h"
@@ -64,13 +65,7 @@ How many hands does Player 1 win?
 // Tasks
 // 1. Load file
 // 2. Data structure to represent a hand
-// 3. logic to compare two hands and select a winner.
-
-namespace
-	{
-
-	}
-
+// 3. logic to compare two hands and select a winner.s
 
 int main()
 	{
@@ -87,6 +82,19 @@ int main()
 		{
 		std::cout << "Unexpected exception type" << std::endl;
 		}
+
+	std::map<CEvaluator::player_t, size_t> score;
+	score[CEvaluator::player_1] = 0;
+	score[CEvaluator::player_2] = 0;
+
+	std::for_each (t.begin (), t.end (), [&score] (const CMatch& m) 
+		{
+		std::cout << m.print_result () << std::endl;
+		score[m.winner()]++;
+		});
+
+	std::cout <<std::endl << "Player 1 Score: " << score[CEvaluator::player_1] << std::endl <<
+		"Player 2 Score: " << score[CEvaluator::player_2] << std::endl;
 
 	return 0;
 	}

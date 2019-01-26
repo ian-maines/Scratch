@@ -265,6 +265,8 @@ CEvaluator::player_t CEvaluator::CompareHands (const CHand& player1, const CHand
 					{
 					throw std::exception ("Overall tie");
 					}
+
+				return w;
 				}
 			}
 
@@ -307,7 +309,7 @@ CEvaluator::player_t CEvaluator::CompareHands (const CHand& player1, const CHand
 		if (p1pair.bHasPair && p2pair.bHasPair)
 			{
 			player_t w = _winner (p1pair.pair_value, p2pair.pair_value);
-			if (w = tie)
+			if (w == tie)
 				{
 				w = _winner (p1pair.sorted_rem_cards, p2pair.sorted_rem_cards);
 				if (w == tie)

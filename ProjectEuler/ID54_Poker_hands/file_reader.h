@@ -35,7 +35,7 @@ tournament_t read_file (const std::string& fname)
 			CHand (CHand::hand_t (all_cards.begin (), all_cards.begin () + 5)),
 			CHand (CHand::hand_t (all_cards.begin () + 5, all_cards.end ()))
 		));
-		std::cout << tournament.back ().print () << std::endl;
+		//std::cout << tournament.back ().print () << std::endl;
 		}
 	return tournament;
 	}

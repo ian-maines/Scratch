@@ -111,6 +111,22 @@ class CEvaluator
 			};
 		static player_t CompareHands (const CHand& player1, const CHand& player2);
 
+		static std::string print (player_t p)
+			{
+			switch (p)
+				{
+				case player_1:
+					return std::string("Player 1");
+					break;
+				case player_2:
+					return std::string("Player 2");
+					break;
+				default:
+					throw std::exception ("Unexpected");
+					break;
+				}
+			}
+
 	private:
 		struct has_xoak
 			{
