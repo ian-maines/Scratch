@@ -1,21 +1,26 @@
-// ID06_Sum_square_difference.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
+// Copyright 2019 Ian Maines
 #include "pch.h"
 #include <iostream>
+#include <cstdint>
+
+/* https://projecteuler.net/problem=6
+The sum of the squares of the first ten natural numbers is,
+1^2 + 2^2 + ... 10^2 = 385
+
+The square of the sum of the first ten natural numbers is,
+(1 + 2 + ... 10)^2 = 55^2 = 3025
+Hence the difference between the sum of the squares of the first ten natural numbers and the square of the sum is 3028 - 385 = 2640
+Find the difference between the sum of the squares of the first one hundred natural numbers and the square of the sum.
+*/
+
+namespace
+	{
+
+	}
 
 int main()
-{
-    std::cout << "Hello World!\n"; 
-}
+	{
+	// Sum of squares first.
+	uint64_t 
+	}
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
