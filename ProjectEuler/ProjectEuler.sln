@@ -17,6 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ID54_Poker_hands", "ID54_Po
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ID54_Poker_hands_test", "ID54_Poker_hands\ID54_Poker_hands_test\ID54_Poker_hands_test.vcxproj", "{BCB476D1-A0AE-4440-AAC4-AE38C3F26819}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ID06_Sum_square_difference", "ID06_Sum_square_difference\ID06_Sum_square_difference.vcxproj", "{018C858F-CA1A-4740-AA54-0FF257C8D7AB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -111,6 +113,18 @@ Global
 		{BCB476D1-A0AE-4440-AAC4-AE38C3F26819}.Test|x64.Build.0 = Release|x64
 		{BCB476D1-A0AE-4440-AAC4-AE38C3F26819}.Test|x86.ActiveCfg = Release|Win32
 		{BCB476D1-A0AE-4440-AAC4-AE38C3F26819}.Test|x86.Build.0 = Release|Win32
+		{018C858F-CA1A-4740-AA54-0FF257C8D7AB}.Debug|x64.ActiveCfg = Debug|x64
+		{018C858F-CA1A-4740-AA54-0FF257C8D7AB}.Debug|x64.Build.0 = Debug|x64
+		{018C858F-CA1A-4740-AA54-0FF257C8D7AB}.Debug|x86.ActiveCfg = Debug|Win32
+		{018C858F-CA1A-4740-AA54-0FF257C8D7AB}.Debug|x86.Build.0 = Debug|Win32
+		{018C858F-CA1A-4740-AA54-0FF257C8D7AB}.Release|x64.ActiveCfg = Release|x64
+		{018C858F-CA1A-4740-AA54-0FF257C8D7AB}.Release|x64.Build.0 = Release|x64
+		{018C858F-CA1A-4740-AA54-0FF257C8D7AB}.Release|x86.ActiveCfg = Release|Win32
+		{018C858F-CA1A-4740-AA54-0FF257C8D7AB}.Release|x86.Build.0 = Release|Win32
+		{018C858F-CA1A-4740-AA54-0FF257C8D7AB}.Test|x64.ActiveCfg = Release|x64
+		{018C858F-CA1A-4740-AA54-0FF257C8D7AB}.Test|x64.Build.0 = Release|x64
+		{018C858F-CA1A-4740-AA54-0FF257C8D7AB}.Test|x86.ActiveCfg = Release|Win32
+		{018C858F-CA1A-4740-AA54-0FF257C8D7AB}.Test|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
