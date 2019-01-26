@@ -21,6 +21,17 @@ namespace
 int main()
 	{
 	// Sum of squares first.
-	uint64_t 
+	uint64_t su_o_sq = 0;
+	uint64_t sq_o_su = 0;
+	for (int i = 1; i <= 100; ++i)
+		{
+		su_o_sq += i * i;
+		sq_o_su += i;
+		}
+	// Now we need to square the sum.
+	sq_o_su = sq_o_su * sq_o_su;
+
+	// Square of sums is going to be larger.
+	std::cout << "Difference=" << sq_o_su - su_o_sq;
 	}
 
