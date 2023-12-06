@@ -149,21 +149,269 @@ namespace
 
 namespace day1
 {
+std::vector<std::string> day1_load ()
+	{
+	const auto _fname =
+		"d1p1.txt";
+		//"d1p1_test.txt";
 
+	return string_vec_input (_fname);
+	}
+
+std::vector<int> day1_input_parse (std::vector<std::string> input)
+	{
+	const std::string digits = { "0123456789" };
+	std::vector<int> rv;
+	
+	// We should not have a vecotr of each line
+
+	for (const auto l : input)
+		{
+		auto first_ch = std::find_first_of (l.begin (), l.end (), digits.begin (), digits.end ());
+		auto last_ch = std::find_first_of (l.rbegin (), l.rend (), digits.begin (), digits.end ());
+		
+		// We SHOULD be able to find a digit in each line.
+		if (first_ch != l.end () && last_ch != l.rend ())
+			{
+			rv.push_back (10 * (*first_ch - '0') + (*last_ch - '0'));
+			}
+		else
+			{
+			throw - 1;
+			}
+		}
+
+	return rv;
+	}
+
+void problem1 ()
+	{
+	size_t val = 0;
+	auto input = day1_input_parse (day1_load());
+
+	for (const auto v : input)
+		{
+		std::cout << v << std::endl;
+		val += v;
+		}
+	std::cout << "Sum of all calibration values is '" << val << "'" << std::endl;
+	}
+
+void problem2 ()
+	{
+	// Approach: Load each line from the file. Convert any text numbers to their corresponding digits. Then use problem 1 algo
+	static const std::vector<std::pair<std::string, char>> _conversion =
+		{
+		 {"one", '1'}
+		,{"two", '2'}
+		,{"three",'3'}
+		,{"four",'4'}
+		,{"five",'5'}
+		,{"six",'6'}
+		,{"seven",'7'}
+		,{"eight",'8'}
+		,{"nine",'9'}
+		,{"zero",'0'}
+		};
+
+	auto raw_input = day1_load ();
+
+	std::vector<int> vals;
+	for (auto& line : raw_input)
+		{
+		std::vector<int> this_line_vals;
+		for (auto i = 0; i < line.length (); ++i)
+			{
+			if (isdigit (line[i]))
+				{
+				this_line_vals.push_back (line[i] - '0');
+				}
+			else
+				{
+				for (const auto number : _conversion)
+					{
+					auto pos = line.find (number.first, i);
+					if (pos == i)
+						{
+						this_line_vals.push_back (number.second - '0');
+						}
+					}
+				}
+			}
+		if (this_line_vals.size () < 1) { throw -2; }
+
+		vals.push_back (10 * *this_line_vals.begin () + *(this_line_vals.end () - 1));
+		}
+		
+	size_t val = 0;
+	for (const auto v : vals)
+		{
+		std::cout << v << std::endl;
+		val += v;
+		}
+	std::cout << "Sum of all calibration values is '" << val << "'" << std::endl;
+	}
+}
+
+namespace day2
+{
+// We get a file with a game number followed by a comma-delimited list of counts of cubes and colors.
+struct handful_t
+	{
+	size_t red = 0;
+	size_t green = 0;
+	size_t blue = 0;
+	};
+
+struct game_t
+	{
+	size_t ID = 0;
+	std::vector<handful_t> handfuls;
+	};
+
+std::vector<game_t> day2_input ()
+	{
+	const auto _fname =
+		"d2p1.txt";
+		//"d2p2_test.txt";
+
+
+	auto input = string_vec_input (_fname);
+
+	std::vector<game_t> rv;
+	// Now parse out each game.
+
+	for (auto line : input)
+		{
+		game_t game;
+		// For completeness we'll grab the game ID from the file.
+		// This is inefficient but I've got better things to do and lots of CPU power
+		game.ID = _get_all_numbers (line)[0];
+
+		// THe line is "Game <ID>: " and after the colon and space the first handful starts. +2 so we don't include the space.
+		std::string handfuls_substr (line, line.find (':') + 2);
+
+		auto separated_handful_strs = _get_delimited_vals (handfuls_substr, ';', true);
+
+		for (auto handful_str : separated_handful_strs)
+			{
+			handful_t this_handful;
+			auto values = _get_delimited_vals (handful_str, ',', true);
+			// At this point we should have a max of 3 strings that contain a number and a color. Parse.
+			for (auto value : values)
+				{
+				// Again not efficient but I've got better stuff to do.
+				size_t count = _get_all_numbers (value)[0];
+
+				// Not the most elegant implementation but that's not why I'm here.
+				if (value.find ("red") != value.npos)
+					{
+					this_handful.red = count;
+					}
+				else if (value.find ("green") != value.npos)
+					{
+					this_handful.green = count;
+					}
+				else if (value.find ("blue") != value.npos)
+					{
+					this_handful.blue = count;
+					}
+				else
+					{
+					throw - 1;
+					}
+				}
+			game.handfuls.push_back (this_handful);
+			}
+		rv.push_back (game);
+		}
+	return rv;
+	}
+
+enum color_t
+	{
+	red = 0,
+	green,
+	blue
+	};
+
+bool _contains_more_than (const game_t& game, const size_t num, const color_t color)
+	{
+	for (const auto& handful : game.handfuls)
+		{
+		switch (color)
+			{
+				case red:
+					if (handful.red > num) return true;
+					break;
+
+				case green:
+					if (handful.green > num) return true;
+					break;
+
+				case blue:
+					if (handful.blue > num) return true;
+					break;
+
+				default:
+					throw - 2;
+					break;
+			}
+		}
+	// IF we get here and didn't find anything the answer is no
+	return false;
+	}
+
+void problem1 ()
+	{
+	auto games = day2_input ();
+
+	// Now that we have all of the games we need to sum up all that would be impossible if we ever saw more than
+	// 12 red, 13 green, or 14 blue cubes.
+	size_t sum_of_ids = 0;
+	for (const auto game : games)
+		{
+		if (!_contains_more_than (game, 12, color_t::red)
+		 && !_contains_more_than (game, 13, color_t::green)
+		 && !_contains_more_than (game, 14, color_t::blue))
+			{
+			sum_of_ids += game.ID;
+			}
+		}
+	std::cout << "Sum of all game IDs that don't match criteria = '" << sum_of_ids << "'" << std::endl;
+	}
+
+handful_t get_mins (const game_t& game)
+	{
+	handful_t rv;
+	for (const auto& handful : game.handfuls)
+		{
+		if (handful.red > rv.red) rv.red = handful.red;
+		if (handful.green > rv.green) rv.green = handful.green;
+		if (handful.blue > rv.blue) rv.blue = handful.blue;
+		}
+	return rv;
+	}
+
+void problem2 ()
+	{
+	auto games = day2_input ();
+
+	// Now we're looking for the minimum number of cubes that could have been used to play each game.
+	// We multiply those together and the sum up their values.
+	size_t sum_of_powers = 0;
+	for (auto game : games)
+		{
+		auto mins = get_mins (game);
+		size_t power = mins.red * mins.green * mins.blue;
+		sum_of_powers += power;
+		}
+
+	std::cout << "Sum of all Game powers = '" << sum_of_powers << "'" << std::endl;
+	}
 }
 
 int main()
-{
-    std::cout << "Hello World!\n";
-}
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
+	{
+	day2::problem2 ();
+	}
