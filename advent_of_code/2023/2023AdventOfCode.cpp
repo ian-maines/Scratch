@@ -7,6 +7,8 @@
 #include <string>
 #include <algorithm>
 #include <format>
+#include <thread>
+#include <chrono>
 
 namespace
 {
@@ -106,16 +108,35 @@ namespace
 		return _print (c.x, c.y);
 		}
 
-	using grid_t = std::vector<std::vector<char>>;
-
-	grid_t _reserve_grid (size_t x_dim, size_t y_dim, char fill)
+	std::vector<std::vector<char>> _reserve_grid (size_t x_dim, size_t y_dim, char fill)
 		{
-		return grid_t (x_dim, std::vector<char> (y_dim, fill));
+		return std::vector<std::vector<char>> (x_dim, std::vector<char> (y_dim, fill));
+		}
+
+	struct grid_t
+		{
+		using grid = std::vector<std::vector<char>>;
+
+		grid_t (size_t x, size_t y, char fill)
+			: x_dim (x)
+			, y_dim (y)
+			, g (_reserve_grid (x, y, fill))
+			{}
+
+
+		size_t x_dim = 0;
+		size_t y_dim = 0;
+		grid g;
+		};
+
+	char _get_grid (const grid_t& g, coord_t c)
+		{
+		return g.g[c.y][c.x];
 		}
 
 	void _set_grid (grid_t& g, coord_t c, char v)
 		{
-		g[c.x][c.y] = v;
+		g.g[c.y][c.x] = v;
 		}
 
 	void _print (const grid_t& g, int ystart = 0, int xstart = 0)
@@ -126,7 +147,7 @@ namespace
 			{
 			std::string hdr;
 			int val = xstart;
-			for (int _x = 0; _x < g.size (); ++_x)
+			for (int _x = 0; _x < g.g.size (); ++_x)
 				{
 				hdr.append (std::format ("{}", val));
 				++val;
@@ -134,13 +155,13 @@ namespace
 			_debug (hdr);
 			}
 
-		for (int y = 0; y < g[0].size (); ++y)
+		for (int y = 0; y < g.g[0].size (); ++y)
 			{
 			std::string row;
 			row.append (std::format ("{:7} |", ystart + y));
-			for (int x = 0; x < g.size (); ++x)
+			for (int x = 0; x < g.g.size (); ++x)
 				{
-				row.push_back (g[x][y]);
+				row.push_back (g.g[y][x]);
 				}
 			_debug (row);
 			}
@@ -411,7 +432,276 @@ void problem2 ()
 	}
 }
 
+namespace day3
+{
+grid_t day2_input (const std::string fname)
+	{
+	auto raw_data = string_vec_input (fname);
+
+	// x-dimension is the length of each line, y is number of lines.
+	auto rv = grid_t (raw_data[0].size (), raw_data.size (), '.');
+
+	for (int y = 0; y < raw_data.size (); ++y)
+		{
+		for (int x = 0; x < raw_data[0].size (); ++x)
+			{
+			_set_grid (rv, coord_t (x, y), raw_data[y][x]);
+			}
+		}
+
+	_print (rv);
+	return rv;
+	}
+
+// A bit hacky but returning false if we're outside the grid means we won't out-of-bounds without having to add complexity to our calling function.
+bool _grid_is_digit (const grid_t& g, coord_t c)
+	{
+	if (c.x >= 0 && c.x < g.x_dim && c.y >= 0 && c.y < g.y_dim)
+		{
+		return isdigit (_get_grid (g, c));
+		}
+	return false;
+	}
+
+void problem1 (const std::string& fname)
+	{
+	auto initial_grid = day2_input (fname);
+
+	// The not-very-clever high-time-complexity solution I have to this is to create an accompanying "mask" grid where each special character is marked as a "blessed" location in the grid.
+	// From there, any digit adjacent to the blessed location is also marked as blessed. This continues (only hoizontally after the first pass so that mult-digit numbers are captured)
+	// Until the grid doesn't change during a complete pass.
+	// Afte that any location on the board is cleared of its value and the reaining numbers are extracted.
+	grid_t blessed = grid_t (initial_grid.x_dim, initial_grid.y_dim, '.');
+
+	// Now in the first pass over the initial grid we need to mark the location of every symbol in the blessed grid
+	std::string _symbols ("~!@#$%^&*()_+=-`[]{}\\|;':\",</?");
+
+	for (int y = 0; y < initial_grid.y_dim; ++y)
+		{
+		for (int x = 0; x < initial_grid.x_dim; ++x)
+			{
+			if (_symbols.find (_get_grid(initial_grid, coord_t(x,y))) != std::string::npos)
+				{
+				_set_grid (blessed, coord_t (x, y), '*');
+				}
+			}
+		}
+	//_print (blessed);
+
+	// Now that we have blessed, find any adjacent digits and mark them as blessed numbers.
+	grid_t blessed_numbers (blessed.x_dim, blessed.y_dim, '.');
+	for (int y = 0; y < blessed.y_dim; ++y)
+		{
+		for (int x = 0; x < blessed.x_dim; ++x)
+			{
+			if (_get_grid (blessed, coord_t (x, y)) == '*')
+				{
+				// Look in each direction (including diagonals) for a digit.
+				for (int ymod = -1; ymod < 2; ++ymod)
+					{
+					for (int xmod = -1; xmod < 2; ++xmod)
+						{
+						if (xmod != 0 || ymod != 0)
+							{
+							coord_t c (x + xmod, y + ymod);
+							if (_grid_is_digit (initial_grid, c))
+								{
+								_set_grid (blessed_numbers, c, '*');
+								//_print (blessed_numbers);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	//_print (blessed_numbers);
+
+	// Now every digit that is adjacent to a symbol is marked. We just need to go through each row and make sure the complete number is marked as blessed.
+	bool bMadeAChange = true;
+	while (bMadeAChange)
+		{
+		bMadeAChange = false;
+		for (int y = 0; y < blessed_numbers.y_dim; ++y)
+			{
+			for (int x = 0; x < blessed_numbers.x_dim; ++x)
+				{
+				if (_get_grid (blessed_numbers, coord_t (x, y)) == '*')
+					{
+					// This time we're just looking in the same x dimension
+					for (int xmod = -1; xmod < 2; ++xmod)
+						{
+						if (xmod != 0)
+							{
+							coord_t c (x + xmod, y);
+							if (_grid_is_digit (initial_grid, c))
+								{
+								if (_get_grid (blessed_numbers, c) != '*')
+									{
+									_set_grid (blessed_numbers, c, '*');
+									//_print (blessed_numbers);
+									bMadeAChange = true;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+	// Now we have the complete mask to remove non-adjacent numbers from the original grid
+	grid_t updated_grid = initial_grid;
+	for (int y = 0; y < updated_grid.y_dim; ++y)
+		{
+		for (int x = 0; x < updated_grid.x_dim; ++x)
+			{
+			coord_t c (x, y);
+			if (_get_grid (blessed_numbers, c) != '*')
+				{
+				_set_grid (updated_grid, c, '.');
+				}
+			}
+		}
+	_print (updated_grid);
+
+	size_t sum = 0;
+	for (int y = 0; y < updated_grid.g.size (); ++y)
+		{
+		auto val = updated_grid.g[y];
+		std::string str = std::string (val.begin(), val.end());
+		auto nums = _get_all_numbers (str);
+		for (auto& num : nums)
+			{
+			sum += num;
+			}
+		}
+	std::cout << "The sum of all of the part numbers is '" << sum << "'" << std::endl;
+	}
+
+	void problem2 (const std::string& fname)
+		{
+				{
+				auto initial_grid = day2_input (fname);
+
+				// The not-very-clever high-time-complexity solution I have to this is to create an accompanying "mask" grid where each special character is marked as a "blessed" location in the grid.
+				// From there, any digit adjacent to the blessed location is also marked as blessed. This continues (only hoizontally after the first pass so that mult-digit numbers are captured)
+				// Until the grid doesn't change during a complete pass.
+				// Afte that any location on the board is cleared of its value and the reaining numbers are extracted.
+
+				grid_t blessed = grid_t (initial_grid.x_dim, initial_grid.y_dim, '.');
+
+				// Now in the first pass over the initial grid we need to mark the location of every * symbol in the blessed grid
+				for (int y = 0; y < initial_grid.y_dim; ++y)
+					{
+					for (int x = 0; x < initial_grid.x_dim; ++x)
+						{
+						if (_get_grid (initial_grid, coord_t (x, y)) == '*')
+							{
+							_set_grid (blessed, coord_t (x, y), '*');
+							}
+						}
+					}
+				//_print (blessed);
+
+				// Now that we have blessed, find any adjacent digits and mark them as blessed numbers.
+				grid_t blessed_numbers (blessed.x_dim, blessed.y_dim, '.');
+				for (int y = 0; y < blessed.y_dim; ++y)
+					{
+					for (int x = 0; x < blessed.x_dim; ++x)
+						{
+						size_t adj_count = 0;
+						if (_get_grid (blessed, coord_t (x, y)) == '*')
+							{
+							// Look in each direction (including diagonals) for a digit.
+							for (int ymod = -1; ymod < 2; ++ymod)
+								{
+								for (int xmod = -1; xmod < 2; ++xmod)
+									{
+									if (xmod != 0 || ymod != 0)
+										{
+										coord_t c (x + xmod, y + ymod);
+										if (_grid_is_digit (initial_grid, c))
+											{
+											++adj_count;
+											_set_grid (blessed_numbers, c, '*');
+											//_print (blessed_numbers);
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				//_print (blessed_numbers);
+
+				// Now every digit that is adjacent to a symbol is marked. We just need to go through each row and make sure the complete number is marked as blessed.
+				bool bMadeAChange = true;
+				while (bMadeAChange)
+					{
+					bMadeAChange = false;
+					for (int y = 0; y < blessed_numbers.y_dim; ++y)
+						{
+						for (int x = 0; x < blessed_numbers.x_dim; ++x)
+							{
+							if (_get_grid (blessed_numbers, coord_t (x, y)) == '*')
+								{
+								// This time we're just looking in the same x dimension
+								for (int xmod = -1; xmod < 2; ++xmod)
+									{
+									if (xmod != 0)
+										{
+										coord_t c (x + xmod, y);
+										if (_grid_is_digit (initial_grid, c))
+											{
+											if (_get_grid (blessed_numbers, c) != '*')
+												{
+												_set_grid (blessed_numbers, c, '*');
+												//_print (blessed_numbers);
+												bMadeAChange = true;
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+
+				// Now we have the complete mask to remove non-adjacent numbers from the original grid
+				grid_t updated_grid = initial_grid;
+				for (int y = 0; y < updated_grid.y_dim; ++y)
+					{
+					for (int x = 0; x < updated_grid.x_dim; ++x)
+						{
+						coord_t c (x, y);
+						if (_get_grid (blessed_numbers, c) != '*')
+							{
+							_set_grid (updated_grid, c, '.');
+							}
+						}
+					}
+				_print (updated_grid);
+
+				size_t sum = 0;
+				for (int y = 0; y < updated_grid.g.size (); ++y)
+					{
+					auto val = updated_grid.g[y];
+					std::string str = std::string (val.begin (), val.end ());
+					auto nums = _get_all_numbers (str);
+					for (auto& num : nums)
+						{
+						sum += num;
+						}
+					}
+				std::cout << "The sum of all of the part numbers is '" << sum << "'" << std::endl;
+		}
+}
+
 int main()
 	{
-	day2::problem2 ();
+	day3::problem2 (
+		"d3p1_test.txt"
+		//"d3p1.txt"
+		);
 	}
